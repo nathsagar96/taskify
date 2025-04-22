@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: task-tracker-postgres
+    container_name: taskify-postgres
     environment:
       POSTGRES_DB: taskdb
       POSTGRES_USER: postgres
@@ -16,10 +16,10 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - task-tracker-network
+      - taskify-network
 
 networks:
-  task-tracker-network:
+  taskify-network:
     driver: bridge
 
 volumes:

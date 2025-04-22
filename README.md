@@ -1,4 +1,4 @@
-# 📝 Task Tracker
+# 📝 Taskify
 
 A robust Spring Boot REST API for managing tasks and task lists with full CRUD operations.
 
@@ -57,8 +57,8 @@ A robust Spring Boot REST API for managing tasks and task lists with full CRUD o
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/nathsagar96/task-tracker.git
-cd task-tracker
+git clone https://github.com/nathsagar96/taskify.git
+cd taskify
 ```
 
 2. Build and run the application:

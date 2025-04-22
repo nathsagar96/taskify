@@ -11,9 +11,9 @@
     </parent>
 
     <groupId>dev.sagar</groupId>
-    <artifactId>task-tracker</artifactId>
+    <artifactId>taskify</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>task-tracker</name>
+    <name>taskify</name>
     <description>Task Tracker Application</description>
 
     <properties>
