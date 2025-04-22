@@ -21,11 +21,10 @@ class TaskMapperImplTest {
 
   private Task task;
   private TaskDto taskDto;
-  private LocalDateTime dueDate;
 
   @BeforeEach
   void setUp() {
-    dueDate = LocalDateTime.now().plusDays(1);
+    LocalDateTime dueDate = LocalDateTime.now().plusDays(1);
 
     task =
         Task.builder()

@@ -68,7 +68,7 @@ class TaskServiceImplTest {
 
         // Assert
         assertEquals(1, result.size());
-        assertEquals(task, result.get(0));
+        assertEquals(task, result.getFirst());
         verify(taskRepository).findByTaskListId(taskListId);
     }
 

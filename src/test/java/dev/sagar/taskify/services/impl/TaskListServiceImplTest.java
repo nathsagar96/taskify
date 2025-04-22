@@ -49,7 +49,7 @@ class TaskListServiceImplTest {
 
     // Assert
     assertEquals(1, result.size());
-    assertEquals(taskList, result.get(0));
+    assertEquals(taskList, result.getFirst());
     verify(taskListRepository).findAll();
   }
 

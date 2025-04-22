@@ -23,7 +23,6 @@ A robust Spring Boot REST API for managing tasks and task lists with full CRUD o
 
 - Create, read, update, and delete task lists
 - Manage tasks within task lists
-- Mark tasks as complete
 - Track completion percentage of task lists
 - Priority-based task management
 - Due date tracking for tasks

@@ -57,7 +57,7 @@ class TaskListControllerTest {
 
     // Assert
     assertEquals(1, result.size());
-    assertEquals(taskListDto, result.get(0));
+    assertEquals(taskListDto, result.getFirst());
     verify(taskListService).listTaskLists();
     verify(taskListMapper).toDto(taskList);
   }
