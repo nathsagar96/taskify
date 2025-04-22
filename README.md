@@ -73,22 +73,21 @@ mvn spring-boot:run
 ### Task Lists
 
 ```
-POST    /api/v1/tasklists           - Create a new task list
-GET     /api/v1/tasklists           - Get all task lists
-GET     /api/v1/tasklists/{id}      - Get a task list by ID
-PUT     /api/v1/tasklists/{id}      - Update a task list
-DELETE  /api/v1/tasklists/{id}      - Delete a task list
+POST    /api/v1/task-lists                     - Create a new task list
+GET     /api/v1/task-lists                     - Get all task lists
+GET     /api/v1/task-lists/{task_list_id}      - Get a task list by ID
+PUT     /api/v1/task-lists/{task_list_id}      - Update a task list
+DELETE  /api/v1/task-lists/{task_list_id}      - Delete a task list
 ```
 
 ### Tasks
 
 ```
-POST    /api/v1/tasklists/{taskListId}/tasks            - Create a new task
-GET     /api/v1/tasklists/{taskListId}/tasks            - Get all tasks in a list
-GET     /api/v1/tasklists/{taskListId}/tasks/{taskId}   - Get a task by ID
-PUT     /api/v1/tasklists/{taskListId}/tasks/{taskId}   - Update a task
-PATCH   /api/v1/tasklists/{taskListId}/tasks/{taskId}/complete - Mark task as complete
-DELETE  /api/v1/tasklists/{taskListId}/tasks/{taskId}   - Delete a task
+POST    /api/v1/task-lists/{task_list_id}/tasks             - Create a new task
+GET     /api/v1/task-lists/{task_list_id}/tasks             - Get all tasks in a list
+GET     /api/v1/task-lists/{task_list_id}/tasks/{task_id}   - Get a task by ID
+PUT     /api/v1/task-lists/{task_list_id}/tasks/{task_id}   - Update a task
+DELETE  /api/v1/task-lists/{task_list_id}/tasks/{task_id}   - Delete a task
 ```
 
 ## 🤝 Contributing
