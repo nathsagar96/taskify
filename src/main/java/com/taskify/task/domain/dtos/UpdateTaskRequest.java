@@ -1,0 +1,15 @@
+package com.taskify.task.domain.dtos;
+
+import com.taskify.task.domain.entities.TaskPriority;
+import com.taskify.task.domain.entities.TaskStatus;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+
+public record UpdateTaskRequest(
+    @NotBlank @Size(min = 1, max = 255) String title,
+    String description,
+    @NotNull LocalDateTime dueDate,
+    @NotNull TaskPriority priority,
+    @NotNull TaskStatus status) {}

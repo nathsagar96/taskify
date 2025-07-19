@@ -1,112 +1,131 @@
-# 📝 Taskify
+# Taskify 🚀
 
-A robust Spring Boot REST API for managing tasks and task lists with full CRUD operations.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Java](https://img.shields.io/badge/Java-21-blue.svg?logo=openjdk&logoColor=white)](https://openjdk.java.net/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-green.svg?logo=spring&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Maven](https://img.shields.io/badge/Maven-3.x-red.svg?logo=apache-maven&logoColor=white)](https://maven.apache.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-blue.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-blue.svg?logo=docker&logoColor=white)](https://www.docker.com/)
 
-[![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://openjdk.org/projects/jdk/21/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+## Project Overview ✨
 
-## 📑 Table of Contents
+Taskify is a robust and intuitive task management application built with Spring Boot. It provides a comprehensive set of
+features to help users organize their tasks efficiently, manage task lists, and track progress. Designed with a focus on
+clean architecture, security, and performance, Taskify aims to deliver a seamless experience for personal and team
+productivity.
 
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Installation](#installation)
-- [API Endpoints](#api-endpoints)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
-- [Acknowledgements](#acknowledgements)
+## Key Features 🚀
 
-## ✨ Features
+* **Task Management**: Create, read, update, and delete individual tasks.
+* **Task List Organization**: Group tasks into logical lists for better organization.
+* **Task Prioritization**: Assign priorities (LOW, MEDIUM, HIGH) to tasks.
+* **Status Tracking**: Track task status (OPEN, CLOSED).
+* **RESTful API**: A well-documented and intuitive RESTful API for seamless integration.
+* **Global Exception Handling**: Centralized error handling for a consistent API response.
+* **Database Migrations**: Schema management using Flyway for reliable database evolution.
+* **Comprehensive Testing**: Unit and integration tests ensuring application reliability.
+* **Caching**: Caching enabled for improved performance.
 
-- Create, read, update, and delete task lists
-- Manage tasks within task lists
-- Track completion percentage of task lists
-- Priority-based task management
-- Due date tracking for tasks
-- Validation for all inputs
-- PostgreSQL persistence
-- Docker support for development and testing
+## Technologies Used 🛠️
 
-## 🛠 Tech Stack
+* **Spring Boot**: Framework for building robust, production-ready Spring applications.
+* **Java 21**: The latest LTS version of Java.
+* **Spring Data JPA**: For simplified data access and persistence.
+* **Hibernate**: ORM framework for database interaction.
+* **PostgreSQL**: Relational database for data storage.
+* **Flyway**: Database migration tool.
+* **Maven**: Build automation tool.
+* **JUnit 5 & Mockito**: For unit testing.
+* **Testcontainers**: For integration testing with real database instances.
+* **Swagger/OpenAPI**: For API documentation.
 
-- Java 21
-- Spring Boot 3.4.4
-- Spring Data JPA
-- PostgreSQL
-- Docker & Docker Compose
-- Maven
-- Lombok
-- Testcontainers
-- Jakarta Validation
+## Getting Started 🏁
 
-## 🚀 Getting Started
+Follow these instructions to get a copy of the project up and running on your local machine for development and testing
+purposes.
 
-### Prerequisites
+### Prerequisites 📋
 
-- Java 21 or higher
-- Maven 3.6+
-- Docker and Docker Compose
-- PostgreSQL (automatically handled via Docker)
+Before you begin, ensure you have the following installed:
 
-### Installation
+* **Java Development Kit (JDK) 21** or higher
+* **Maven 3.8.x** or higher
+* **Docker Desktop** (for running PostgreSQL via `compose.yaml`)
+* **Git**
 
-1. Clone the repository:
+### Installation ⚙️
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/nathsagar96/taskify.git
+   cd taskify
+   ```
+2. **Start the PostgreSQL database using Docker Compose:**
+   ```bash
+   docker-compose up -d
+   ```
+   This will start a PostgreSQL container in the background.
+3. **Build the project using Maven:**
+   ```bash
+   ./mvnw clean install
+   ```
+
+### Running the Application ▶️
+
+After successful installation and database setup, you can run the Spring Boot application:
 
 ```bash
-git clone https://github.com/nathsagar96/taskify.git
-cd taskify
+./mvnw spring-boot:run
 ```
 
-2. Build and run the application:
+The application will start on `http://localhost:8080` by default.
 
-```bash
-mvn clean install
-mvn spring-boot:run
-```
+## API Documentation 📖
 
-## 🔌 API Endpoints
+The API documentation is available via Swagger UI once the application is running.
 
-### Task Lists
+* **Swagger UI**: Access the interactive API documentation at `http://localhost:8080/swagger-ui.html`
 
-```
-POST    /api/v1/task-lists                     - Create a new task list
-GET     /api/v1/task-lists                     - Get all task lists
-GET     /api/v1/task-lists/{task_list_id}      - Get a task list by ID
-PUT     /api/v1/task-lists/{task_list_id}      - Update a task list
-DELETE  /api/v1/task-lists/{task_list_id}      - Delete a task list
-```
+## Usage 💡
 
-### Tasks
+You can interact with the API using tools like Postman, curl, or any HTTP client. A Postman collection is provided for
+easy testing.
 
-```
-POST    /api/v1/task-lists/{task_list_id}/tasks             - Create a new task
-GET     /api/v1/task-lists/{task_list_id}/tasks             - Get all tasks in a list
-GET     /api/v1/task-lists/{task_list_id}/tasks/{task_id}   - Get a task by ID
-PUT     /api/v1/task-lists/{task_list_id}/tasks/{task_id}   - Update a task
-DELETE  /api/v1/task-lists/{task_list_id}/tasks/{task_id}   - Delete a task
-```
+### Postman Collection 📥
 
-## 🤝 Contributing
+A Postman collection named [Taskify.postman_collection.json](Taskify.postman_collection.json) is included in the root
+directory of this project. You can import this collection into Postman to quickly test all available endpoints.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+**Key Endpoints:**
+
+* **Task Lists**:
+    * `GET /api/v1/tasklists`: Retrieve all task lists.
+    * `GET /api/v1/tasklists/{task_list_id}`: Retrieve a specific task list by ID.
+    * `POST /api/v1/tasklists`: Create a new task list.
+    * `PUT /api/v1/tasklists/{task_list_id}`: Update an existing task list.
+    * `DELETE /api/v1/tasklists/{task_list_id}`: Delete a task list.
+* **Tasks**:
+    * `GET /api/v1/tasklists/{task_list_id}/tasks`: Retrieve all tasks for a specific task list.
+    * `GET /api/v1/tasklists/{task_list_id}/tasks/{task_id}`: Retrieve a specific task by ID within a task list.
+    * `POST /api/v1/tasklists/{task_list_id}/tasks`: Create a new task within a task list.
+    * `PUT /api/v1/tasklists/{task_list_id}/tasks/{task_id}`: Update an existing task within a task list.
+    * `DELETE /api/v1/tasklists/{task_list_id}/tasks/{task_id}`: Delete a task within a task list.
+
+## Contributing 🤝
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any
+contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also
+simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! ⭐ Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📄 License
+## License 📄
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📫 Contact
-
-Sagar Nath - [@nathsagar96](https://github.com/nathsagar96)
-
-## 🙏 Acknowledgements
-
-- [Spring Boot](https://spring.io/projects/spring-boot) - The web framework used
-- [Docker](https://www.docker.com/) - For containerization
-- [Project Lombok](https://projectlombok.org/) - For reducing boilerplate code
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
