@@ -6,8 +6,10 @@ import com.taskify.repositories.TaskRepository;
 import com.taskify.services.TaskService;
 import com.taskify.entities.Task;
 import com.taskify.entities.TaskStatus;
+import com.taskify.entities.TaskPriority;
 import com.taskify.repositories.TaskListRepository;
 import com.taskify.entities.TaskList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -61,11 +63,28 @@ public class TaskServiceImpl implements TaskService {
                     new TaskNotFoundException(
                         "Task not found with ID: " + taskId + " in Task List: " + taskListId));
 
-    existingTask.setTitle(task.getTitle());
-    existingTask.setDescription(task.getDescription());
-    existingTask.setDueDate(task.getDueDate());
-    existingTask.setPriority(task.getPriority());
-    existingTask.setStatus(task.getStatus());
+    if (task.getTitle() != null) {
+      existingTask.setTitle(task.getTitle());
+    }
+
+    if (task.getDescription() != null) {
+      existingTask.setDescription(task.getDescription());
+    }
+
+    if (task.getDueDate() != null) {
+      if (task.getDueDate().isBefore(LocalDateTime.now())) {
+        throw new IllegalArgumentException("Due date cannot be in the past");
+      }
+      existingTask.setDueDate(task.getDueDate());
+    }
+
+    if (task.getPriority() != null) {
+      existingTask.setPriority(task.getPriority());
+    }
+
+    if (task.getStatus() != null) {
+      existingTask.setStatus(task.getStatus());
+    }
 
     return taskRepository.save(existingTask);
   }

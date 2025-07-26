@@ -180,4 +180,74 @@ class TaskServiceTest {
 
     verify(taskRepository, times(1)).deleteByTaskListIdAndId(taskListId, taskId);
   }
+
+  @Test
+  @DisplayName("Should update task with partial fields successfully")
+  void shouldUpdateTaskWithPartialFieldsSuccessfully() {
+    Task updatedTaskDetails = new Task();
+    updatedTaskDetails.setTitle("Updated Task Title");
+
+    when(taskRepository.findByTaskListIdAndId(taskListId, taskId)).thenReturn(Optional.of(task));
+    when(taskRepository.save(any(Task.class))).thenReturn(task);
+
+    Task result = taskService.updateTask(taskListId, taskId, updatedTaskDetails);
+
+    assertNotNull(result);
+    assertEquals(updatedTaskDetails.getTitle(), result.getTitle());
+    assertEquals(task.getDescription(), result.getDescription());
+    assertEquals(task.getDueDate(), result.getDueDate());
+    assertEquals(task.getPriority(), result.getPriority());
+    assertEquals(task.getStatus(), result.getStatus());
+    verify(taskRepository, times(1)).findByTaskListIdAndId(taskListId, taskId);
+    verify(taskRepository, times(1)).save(task);
+  }
+
+  @Test
+  @DisplayName("Should update task due date successfully through updateTask")
+  void shouldUpdateTaskDueDateSuccessfullyThroughUpdateTask() {
+    Task updatedTaskDetails = new Task();
+    updatedTaskDetails.setDueDate(LocalDateTime.now().plusDays(5));
+
+    when(taskRepository.findByTaskListIdAndId(taskListId, taskId)).thenReturn(Optional.of(task));
+    when(taskRepository.save(any(Task.class))).thenReturn(task);
+
+    Task result = taskService.updateTask(taskListId, taskId, updatedTaskDetails);
+
+    assertNotNull(result);
+    assertEquals(updatedTaskDetails.getDueDate(), result.getDueDate());
+    verify(taskRepository, times(1)).findByTaskListIdAndId(taskListId, taskId);
+    verify(taskRepository, times(1)).save(task);
+  }
+
+  @Test
+  @DisplayName("Should update task priority successfully through updateTask")
+  void shouldUpdateTaskPrioritySuccessfullyThroughUpdateTask() {
+    Task updatedTaskDetails = new Task();
+    updatedTaskDetails.setPriority(TaskPriority.HIGH);
+
+    when(taskRepository.findByTaskListIdAndId(taskListId, taskId)).thenReturn(Optional.of(task));
+    when(taskRepository.save(any(Task.class))).thenReturn(task);
+
+    Task result = taskService.updateTask(taskListId, taskId, updatedTaskDetails);
+
+    assertNotNull(result);
+    assertEquals(updatedTaskDetails.getPriority(), result.getPriority());
+    verify(taskRepository, times(1)).findByTaskListIdAndId(taskListId, taskId);
+    verify(taskRepository, times(1)).save(task);
+  }
+
+  @Test
+  @DisplayName("Should throw IllegalArgumentException when updating due date with past date through updateTask")
+  void shouldThrowIllegalArgumentExceptionWhenUpdatingDueDateWithPastDateThroughUpdateTask() {
+    Task updatedTaskDetails = new Task();
+    updatedTaskDetails.setDueDate(LocalDateTime.now().minusDays(1));
+
+    when(taskRepository.findByTaskListIdAndId(taskListId, taskId)).thenReturn(Optional.of(task));
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> taskService.updateTask(taskListId, taskId, updatedTaskDetails));
+    verify(taskRepository, times(1)).findByTaskListIdAndId(taskListId, taskId);
+    verify(taskRepository, never()).save(any(Task.class));
+  }
 }
