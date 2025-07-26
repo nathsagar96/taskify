@@ -12,31 +12,26 @@ public class Task {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(name = "id", updatable = false, nullable = false)
+  @Column(updatable = false, nullable = false)
   private UUID id;
 
-  @Column(name = "title", nullable = false)
+  @Column(nullable = false)
   private String title;
 
-  @Column(name = "description")
   private String description;
-
-  @Column(name = "due_date")
   private LocalDateTime dueDate;
 
-  @Column(name = "priority", nullable = false)
+  @Column(nullable = false)
   private TaskPriority priority;
 
-  @Column(name = "status", nullable = false)
+  @Column(nullable = false)
   private TaskStatus status;
 
   @CreationTimestamp
-  @Column(name = "created", nullable = false)
+  @Column(nullable = false)
   private LocalDateTime created;
 
-  @UpdateTimestamp
-  @Column(name = "updated", nullable = false)
-  private LocalDateTime updated;
+  @UpdateTimestamp private LocalDateTime updated;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "task_list_id")

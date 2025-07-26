@@ -13,22 +13,19 @@ public class TaskList {
 
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(name = "id", updatable = false, nullable = false)
+  @Column(updatable = false, nullable = false)
   private UUID id;
 
-  @Column(name = "title", nullable = false)
+  @Column(nullable = false)
   private String title;
 
-  @Column(name = "description")
   private String description;
 
   @CreationTimestamp
-  @Column(name = "created", nullable = false)
+  @Column(nullable = false)
   private LocalDateTime created;
 
-  @UpdateTimestamp
-  @Column(name = "updated", nullable = false)
-  private LocalDateTime updated;
+  @UpdateTimestamp private LocalDateTime updated;
 
   @OneToMany(
       mappedBy = "taskList",
