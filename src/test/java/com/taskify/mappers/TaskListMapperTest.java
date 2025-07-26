@@ -6,20 +6,18 @@ import com.taskify.dtos.CreateTaskListRequest;
 import com.taskify.dtos.TaskListDto;
 import com.taskify.dtos.UpdateTaskListRequest;
 import com.taskify.entities.TaskList;
+import com.taskify.mappers.impl.TaskListMapperImpl;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class TaskListMapperTest {
 
-  private TaskListMapper taskListMapper;
-
-  @BeforeEach
-  void setUp() {
-    taskListMapper = Mappers.getMapper(TaskListMapper.class);
-  }
+  @InjectMocks private TaskListMapperImpl taskListMapper;
 
   @Test
   @DisplayName("Should map TaskList entity to TaskListDto")
@@ -32,6 +30,8 @@ class TaskListMapperTest {
     TaskListDto taskListDto = taskListMapper.toDto(taskList);
 
     assertNotNull(taskListDto);
+    assertEquals(0, taskListDto.count());
+    assertEquals(0.0, taskListDto.progress());
     assertEquals(taskList.getId(), taskListDto.id());
     assertEquals(taskList.getTitle(), taskListDto.title());
   }
@@ -59,6 +59,7 @@ class TaskListMapperTest {
 
     assertNotNull(taskList);
     assertEquals(request.title(), taskList.getTitle());
+    assertEquals(request.description(), taskList.getDescription());
     assertNull(taskList.getId()); // ID should be null for mapping
   }
 }

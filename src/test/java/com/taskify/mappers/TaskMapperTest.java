@@ -9,21 +9,19 @@ import com.taskify.entities.Task;
 import com.taskify.entities.TaskList;
 import com.taskify.entities.TaskPriority;
 import com.taskify.entities.TaskStatus;
+import com.taskify.mappers.impl.TaskMapperImpl;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class TaskMapperTest {
 
-  private TaskMapper taskMapper;
-
-  @BeforeEach
-  void setUp() {
-    taskMapper = Mappers.getMapper(TaskMapper.class);
-  }
+  @InjectMocks private TaskMapperImpl taskMapper;
 
   @Test
   @DisplayName("Should map Task entity to TaskDto")
