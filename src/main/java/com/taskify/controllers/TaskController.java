@@ -83,7 +83,7 @@ public class TaskController {
       value = {@ApiResponse(responseCode = "204", description = "Task deleted successfully")})
   @DeleteMapping(path = "/{task_id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public ResponseEntity<Valid> deleteTask(
+  public ResponseEntity<Void> deleteTask(
       @PathVariable("task_list_id") UUID taskListId, @PathVariable("task_id") UUID taskId) {
     taskService.deleteTask(taskListId, taskId);
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
