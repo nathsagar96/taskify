@@ -1,9 +1,9 @@
 package com.taskify.services.impl;
 
+import com.taskify.entities.TaskList;
 import com.taskify.exceptions.TaskListNotFoundException;
 import com.taskify.repositories.TaskListRepository;
 import com.taskify.services.TaskListService;
-import com.taskify.entities.TaskList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

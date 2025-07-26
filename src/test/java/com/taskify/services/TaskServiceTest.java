@@ -3,15 +3,15 @@ package com.taskify.services;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.taskify.exceptions.TaskListNotFoundException;
-import com.taskify.exceptions.TaskNotFoundException;
-import com.taskify.repositories.TaskRepository;
 import com.taskify.entities.Task;
+import com.taskify.entities.TaskList;
 import com.taskify.entities.TaskPriority;
 import com.taskify.entities.TaskStatus;
-import com.taskify.services.impl.TaskServiceImpl;
+import com.taskify.exceptions.TaskListNotFoundException;
+import com.taskify.exceptions.TaskNotFoundException;
 import com.taskify.repositories.TaskListRepository;
-import com.taskify.entities.TaskList;
+import com.taskify.repositories.TaskRepository;
+import com.taskify.services.impl.TaskServiceImpl;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -237,7 +237,8 @@ class TaskServiceTest {
   }
 
   @Test
-  @DisplayName("Should throw IllegalArgumentException when updating due date with past date through updateTask")
+  @DisplayName(
+      "Should throw IllegalArgumentException when updating due date with past date through updateTask")
   void shouldThrowIllegalArgumentExceptionWhenUpdatingDueDateWithPastDateThroughUpdateTask() {
     Task updatedTaskDetails = new Task();
     updatedTaskDetails.setDueDate(LocalDateTime.now().minusDays(1));

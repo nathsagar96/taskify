@@ -75,23 +75,23 @@ class TaskControllerTest {
     task2.setStatus(TaskStatus.OPEN);
     task2.setTaskList(taskList);
 
-    taskDto1 = new TaskDto(
-        task1.getId(),
-        task1.getTitle(),
-        task1.getDescription(),
-        task1.getDueDate(),
-        task1.getPriority(),
-        task1.getStatus()
-    );
+    taskDto1 =
+        new TaskDto(
+            task1.getId(),
+            task1.getTitle(),
+            task1.getDescription(),
+            task1.getDueDate(),
+            task1.getPriority(),
+            task1.getStatus());
 
-    taskDto2 = new TaskDto(
-        task2.getId(),
-        task2.getTitle(),
-        task2.getDescription(),
-        task2.getDueDate(),
-        task2.getPriority(),
-        task2.getStatus()
-    );
+    taskDto2 =
+        new TaskDto(
+            task2.getId(),
+            task2.getTitle(),
+            task2.getDescription(),
+            task2.getDueDate(),
+            task2.getPriority(),
+            task2.getStatus());
   }
 
   @Test
@@ -148,14 +148,14 @@ class TaskControllerTest {
     newTask.setStatus(TaskStatus.OPEN);
     newTask.setTaskList(taskList);
 
-    TaskDto newTaskDto = new TaskDto(
-        newTask.getId(),
-        newTask.getTitle(),
-        newTask.getDescription(),
-        newTask.getDueDate(),
-        newTask.getPriority(),
-        newTask.getStatus()
-    );
+    TaskDto newTaskDto =
+        new TaskDto(
+            newTask.getId(),
+            newTask.getTitle(),
+            newTask.getDescription(),
+            newTask.getDueDate(),
+            newTask.getPriority(),
+            newTask.getStatus());
 
     when(taskService.createTask(eq(taskList.getId()), any(Task.class))).thenReturn(newTask);
     when(taskMapper.fromCreateRequest(request)).thenReturn(newTask);
@@ -193,7 +193,8 @@ class TaskControllerTest {
 
     when(taskMapper.fromCreateRequest(request)).thenReturn(taskToCreate);
     when(taskService.createTask(eq(nonExistentTaskListId), eq(taskToCreate)))
-        .thenThrow(new TaskListNotFoundException("Task List not found with ID: " + nonExistentTaskListId));
+        .thenThrow(
+            new TaskListNotFoundException("Task List not found with ID: " + nonExistentTaskListId));
 
     // Act & Assert
     mockMvc
@@ -202,7 +203,8 @@ class TaskControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("TASK_LIST_NOT_FOUND")));
+        .andExpect(
+            jsonPath("$.detail", is("Task List not found with ID: " + nonExistentTaskListId)));
   }
 
   @Test
@@ -269,17 +271,18 @@ class TaskControllerTest {
     updatedTask.setStatus(request.status());
     updatedTask.setTaskList(taskList);
 
-    TaskDto updatedTaskDto = new TaskDto(
-        updatedTask.getId(),
-        updatedTask.getTitle(),
-        updatedTask.getDescription(),
-        updatedTask.getDueDate(),
-        updatedTask.getPriority(),
-        updatedTask.getStatus()
-    );
+    TaskDto updatedTaskDto =
+        new TaskDto(
+            updatedTask.getId(),
+            updatedTask.getTitle(),
+            updatedTask.getDescription(),
+            updatedTask.getDueDate(),
+            updatedTask.getPriority(),
+            updatedTask.getStatus());
 
     when(taskMapper.fromUpdateRequest(request)).thenReturn(taskToUpdate);
-    when(taskService.updateTask(eq(taskList.getId()), eq(task1.getId()), eq(taskToUpdate))).thenReturn(updatedTask);
+    when(taskService.updateTask(eq(taskList.getId()), eq(task1.getId()), eq(taskToUpdate)))
+        .thenReturn(updatedTask);
     when(taskMapper.toDto(updatedTask)).thenReturn(updatedTaskDto);
 
     // Act & Assert
@@ -321,7 +324,12 @@ class TaskControllerTest {
 
     when(taskMapper.fromUpdateRequest(request)).thenReturn(taskToUpdate);
     when(taskService.updateTask(eq(taskList.getId()), eq(nonExistentTaskId), eq(taskToUpdate)))
-        .thenThrow(new TaskNotFoundException("Task not found with ID: " + nonExistentTaskId + " in Task List: " + taskList.getId()));
+        .thenThrow(
+            new TaskNotFoundException(
+                "Task not found with ID: "
+                    + nonExistentTaskId
+                    + " in Task List: "
+                    + taskList.getId()));
 
     // Act & Assert
     mockMvc
@@ -333,7 +341,14 @@ class TaskControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("TASK_NOT_FOUND")));
+        .andExpect(
+            jsonPath(
+                "$.detail",
+                is(
+                    "Task not found with ID: "
+                        + nonExistentTaskId
+                        + " in Task List: "
+                        + taskList.getId())));
   }
 
   @Test

@@ -202,7 +202,7 @@ class TaskListControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("TASK_LIST_NOT_FOUND")));
+        .andExpect(jsonPath("$.detail", is("Task list not found")));
   }
 
   @Test
@@ -220,6 +220,6 @@ class TaskListControllerTest {
     mockMvc
         .perform(get("/api/v1/task-lists/{id}", taskList1.getId()))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.code", is("TASK_LIST_NOT_FOUND")));
+        .andExpect(jsonPath("$.detail", is("Task list not found")));
   }
 }

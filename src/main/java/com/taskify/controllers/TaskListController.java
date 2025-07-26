@@ -1,11 +1,11 @@
 package com.taskify.controllers;
 
-import com.taskify.mappers.TaskListMapper;
-import com.taskify.services.TaskListService;
 import com.taskify.dtos.CreateTaskListRequest;
 import com.taskify.dtos.TaskListDto;
 import com.taskify.dtos.UpdateTaskListRequest;
 import com.taskify.entities.TaskList;
+import com.taskify.mappers.TaskListMapper;
+import com.taskify.services.TaskListService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

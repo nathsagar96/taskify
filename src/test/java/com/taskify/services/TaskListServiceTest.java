@@ -3,10 +3,10 @@ package com.taskify.services;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.taskify.entities.TaskList;
 import com.taskify.exceptions.TaskListNotFoundException;
 import com.taskify.repositories.TaskListRepository;
 import com.taskify.repositories.TaskRepository;
-import com.taskify.entities.TaskList;
 import com.taskify.services.impl.TaskListServiceImpl;
 import java.util.Collections;
 import java.util.List;

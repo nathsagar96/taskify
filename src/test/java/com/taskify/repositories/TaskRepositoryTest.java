@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.taskify.BaseDataJpaTest;
 import com.taskify.entities.Task;
+import com.taskify.entities.TaskList;
 import com.taskify.entities.TaskPriority;
 import com.taskify.entities.TaskStatus;
-import com.taskify.entities.TaskList;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;

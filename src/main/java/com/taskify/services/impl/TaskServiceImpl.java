@@ -1,14 +1,13 @@
 package com.taskify.services.impl;
 
+import com.taskify.entities.Task;
+import com.taskify.entities.TaskList;
+import com.taskify.entities.TaskStatus;
 import com.taskify.exceptions.TaskListNotFoundException;
 import com.taskify.exceptions.TaskNotFoundException;
+import com.taskify.repositories.TaskListRepository;
 import com.taskify.repositories.TaskRepository;
 import com.taskify.services.TaskService;
-import com.taskify.entities.Task;
-import com.taskify.entities.TaskStatus;
-import com.taskify.entities.TaskPriority;
-import com.taskify.repositories.TaskListRepository;
-import com.taskify.entities.TaskList;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
