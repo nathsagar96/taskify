@@ -15,6 +15,9 @@ import com.taskify.services.TaskService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +36,7 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
+  @Cacheable(value = "tasks", key = "#taskListId")
   public List<TaskDto> listTasks(UUID taskListId) {
     List<Task> tasks = taskRepository.findByTaskListId(taskListId);
     return tasks.stream().map(taskMapper::toDto).toList();
@@ -61,6 +65,7 @@ public class TaskServiceImpl implements TaskService {
   }
 
   @Override
+  @Cacheable(value = "tasks", key = "#taskListId + '-' + #taskId")
   public TaskDto getTask(UUID taskListId, UUID taskId) {
     Task task =
         taskRepository
@@ -74,6 +79,7 @@ public class TaskServiceImpl implements TaskService {
 
   @Override
   @Transactional
+  @CachePut(value = "tasks", key = "#taskListId + '-' + #taskId")
   public TaskDto updateTask(UUID taskListId, UUID taskId, UpdateTaskRequest request) {
     Task existingTask =
         taskRepository
@@ -114,6 +120,7 @@ public class TaskServiceImpl implements TaskService {
 
   @Override
   @Transactional
+  @CacheEvict(value = "tasks", key = "#taskListId + '-' + #taskId")
   public void deleteTask(UUID taskListId, UUID taskId) {
     taskRepository.deleteByTaskListIdAndId(taskListId, taskId);
   }

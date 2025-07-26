@@ -10,6 +10,9 @@ import com.taskify.repositories.TaskListRepository;
 import com.taskify.services.TaskListService;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,7 @@ public class TaskListServiceImpl implements TaskListService {
   }
 
   @Override
+  @Cacheable(value = "taskLists")
   public List<TaskListDto> listTaskLists() {
     return taskListRepository.findAll().stream().map(taskListMapper::toDto).toList();
   }
@@ -39,6 +43,7 @@ public class TaskListServiceImpl implements TaskListService {
   }
 
   @Override
+  @Cacheable(value = "taskLists", key = "#id")
   public TaskListDto getTaskList(UUID id) {
     return taskListRepository
         .findById(id)
@@ -48,6 +53,7 @@ public class TaskListServiceImpl implements TaskListService {
 
   @Override
   @Transactional
+  @CachePut(value = "taskLists", key = "#taskListId")
   public TaskListDto updateTaskList(UUID taskListId, UpdateTaskListRequest request) {
     TaskList taskList = taskListMapper.fromUpdateRequest(request);
     TaskList existingTaskList =
@@ -65,6 +71,7 @@ public class TaskListServiceImpl implements TaskListService {
 
   @Override
   @Transactional
+  @CacheEvict(value = "taskLists", key = "#taskListId")
   public void deleteTaskList(UUID taskListId) {
     taskListRepository.deleteById(taskListId);
   }
