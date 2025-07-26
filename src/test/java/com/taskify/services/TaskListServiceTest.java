@@ -3,8 +3,12 @@ package com.taskify.services;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.taskify.dtos.CreateTaskListRequest;
+import com.taskify.dtos.TaskListDto;
+import com.taskify.dtos.UpdateTaskListRequest;
 import com.taskify.entities.TaskList;
 import com.taskify.exceptions.TaskListNotFoundException;
+import com.taskify.mappers.TaskListMapper;
 import com.taskify.repositories.TaskListRepository;
 import com.taskify.repositories.TaskRepository;
 import com.taskify.services.impl.TaskListServiceImpl;
@@ -24,13 +28,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class TaskListServiceTest {
 
   @Mock private TaskListRepository taskListRepository;
-
+  @Mock private TaskListMapper taskListMapper;
   @Mock private TaskRepository taskRepository;
 
   @InjectMocks private TaskListServiceImpl taskListService;
 
   private UUID taskListId;
   private TaskList taskList;
+  private TaskListDto taskListDto;
 
   @BeforeEach
   void setUp() {
@@ -38,17 +43,25 @@ class TaskListServiceTest {
     taskList = new TaskList();
     taskList.setId(taskListId);
     taskList.setTitle("Test Task List");
+
+    taskListDto =
+        new TaskListDto(
+            taskListId, taskList.getTitle(), taskList.getDescription(), 0, 0.0, List.of());
   }
 
   @Test
   @DisplayName("Should create a task list successfully")
   void shouldCreateTaskListSuccessfully() {
-    when(taskListRepository.save(any(TaskList.class))).thenReturn(taskList);
+    CreateTaskListRequest request = new CreateTaskListRequest("Test Task List", "Description");
 
-    TaskList createdTaskList = taskListService.createTaskList(taskList);
+    when(taskListMapper.fromCreateRequest(any(CreateTaskListRequest.class))).thenReturn(taskList);
+    when(taskListRepository.save(any(TaskList.class))).thenReturn(taskList);
+    when(taskListMapper.toDto(any(TaskList.class))).thenReturn(taskListDto);
+
+    TaskListDto createdTaskList = taskListService.createTaskList(request);
 
     assertNotNull(createdTaskList);
-    assertEquals(taskList.getTitle(), createdTaskList.getTitle());
+    assertEquals(taskListDto.title(), createdTaskList.title());
     verify(taskListRepository, times(1)).save(taskList);
   }
 
@@ -56,13 +69,14 @@ class TaskListServiceTest {
   @DisplayName("Should list all task lists")
   void shouldListAllTaskLists() {
     when(taskListRepository.findAll()).thenReturn(List.of(taskList));
+    when(taskListMapper.toDto(any(TaskList.class))).thenReturn(taskListDto);
 
-    List<TaskList> taskLists = taskListService.listTaskLists();
+    List<TaskListDto> taskLists = taskListService.listTaskLists();
 
     assertNotNull(taskLists);
     assertFalse(taskLists.isEmpty());
     assertEquals(1, taskLists.size());
-    assertEquals(taskList.getTitle(), taskLists.get(0).getTitle());
+    assertEquals(taskListDto.title(), taskLists.getFirst().title());
     verify(taskListRepository, times(1)).findAll();
   }
 
@@ -71,7 +85,7 @@ class TaskListServiceTest {
   void shouldReturnEmptyListWhenNoTaskListsFound() {
     when(taskListRepository.findAll()).thenReturn(Collections.emptyList());
 
-    List<TaskList> taskLists = taskListService.listTaskLists();
+    List<TaskListDto> taskLists = taskListService.listTaskLists();
 
     assertNotNull(taskLists);
     assertTrue(taskLists.isEmpty());
@@ -82,38 +96,41 @@ class TaskListServiceTest {
   @DisplayName("Should get a task list by ID")
   void shouldGetTaskListById() {
     when(taskListRepository.findById(taskListId)).thenReturn(Optional.of(taskList));
+    when(taskListMapper.toDto(any(TaskList.class))).thenReturn(taskListDto);
 
-    Optional<TaskList> foundTaskList = taskListService.getTaskList(taskListId);
+    TaskListDto foundTaskList = taskListService.getTaskList(taskListId);
 
-    assertTrue(foundTaskList.isPresent());
-    assertEquals(taskList.getTitle(), foundTaskList.get().getTitle());
+    assertNotNull(foundTaskList);
+    assertEquals(taskListDto.title(), foundTaskList.title());
     verify(taskListRepository, times(1)).findById(taskListId);
   }
 
   @Test
-  @DisplayName("Should return empty optional when task list not found by ID")
-  void shouldReturnEmptyOptionalWhenTaskListNotFoundById() {
+  @DisplayName("Should throw TaskListNotFoundException when task list not found by ID")
+  void shouldThrowTaskListNotFoundExceptionWhenTaskListNotFoundById() {
     when(taskListRepository.findById(taskListId)).thenReturn(Optional.empty());
 
-    Optional<TaskList> foundTaskList = taskListService.getTaskList(taskListId);
-
-    assertTrue(foundTaskList.isEmpty());
+    assertThrows(TaskListNotFoundException.class, () -> taskListService.getTaskList(taskListId));
     verify(taskListRepository, times(1)).findById(taskListId);
   }
 
   @Test
   @DisplayName("Should update a task list successfully")
   void shouldUpdateTaskListSuccessfully() {
-    TaskList updatedTaskListDetails = new TaskList();
-    updatedTaskListDetails.setTitle("Updated Task List Name");
+    UpdateTaskListRequest request =
+        new UpdateTaskListRequest("Updated Task List Name", "Updated Description");
+    TaskListDto updatedTaskListDto =
+        new TaskListDto(taskListId, request.title(), request.description(), 0, 0.0, List.of());
 
     when(taskListRepository.findById(taskListId)).thenReturn(Optional.of(taskList));
+    when(taskListMapper.fromUpdateRequest(any(UpdateTaskListRequest.class))).thenReturn(taskList);
     when(taskListRepository.save(any(TaskList.class))).thenReturn(taskList);
+    when(taskListMapper.toDto(any(TaskList.class))).thenReturn(updatedTaskListDto);
 
-    TaskList result = taskListService.updateTaskList(taskListId, updatedTaskListDetails);
+    TaskListDto result = taskListService.updateTaskList(taskListId, request);
 
     assertNotNull(result);
-    assertEquals(updatedTaskListDetails.getTitle(), result.getTitle());
+    assertEquals(updatedTaskListDto.title(), result.title());
     verify(taskListRepository, times(1)).findById(taskListId);
     verify(taskListRepository, times(1)).save(taskList);
   }
@@ -121,12 +138,12 @@ class TaskListServiceTest {
   @Test
   @DisplayName("Should throw TaskListNotFoundException when updating non-existent task list")
   void shouldThrowTaskListNotFoundExceptionWhenUpdatingNonExistentTaskList() {
-    TaskList updatedTaskListDetails = new TaskList();
+    UpdateTaskListRequest request =
+        new UpdateTaskListRequest("Updated Task List Name", "Updated Description");
     when(taskListRepository.findById(taskListId)).thenReturn(Optional.empty());
 
     assertThrows(
-        TaskListNotFoundException.class,
-        () -> taskListService.updateTaskList(taskListId, updatedTaskListDetails));
+        TaskListNotFoundException.class, () -> taskListService.updateTaskList(taskListId, request));
     verify(taskListRepository, times(1)).findById(taskListId);
     verify(taskListRepository, never()).save(any(TaskList.class));
   }

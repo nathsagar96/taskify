@@ -1,18 +1,19 @@
 package com.taskify.services;
 
-import com.taskify.entities.TaskList;
+import com.taskify.dtos.CreateTaskListRequest;
+import com.taskify.dtos.TaskListDto;
+import com.taskify.dtos.UpdateTaskListRequest;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface TaskListService {
-  List<TaskList> listTaskLists();
+  List<TaskListDto> listTaskLists();
 
-  TaskList createTaskList(TaskList taskList);
+  TaskListDto createTaskList(CreateTaskListRequest request);
 
-  Optional<TaskList> getTaskList(UUID id);
+  TaskListDto getTaskList(UUID id);
 
-  TaskList updateTaskList(UUID taskListId, TaskList taskList);
+  TaskListDto updateTaskList(UUID taskListId, UpdateTaskListRequest request);
 
   void deleteTaskList(UUID taskListId);
 }

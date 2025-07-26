@@ -3,12 +3,16 @@ package com.taskify.services;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.taskify.dtos.CreateTaskRequest;
+import com.taskify.dtos.TaskDto;
+import com.taskify.dtos.UpdateTaskRequest;
 import com.taskify.entities.Task;
 import com.taskify.entities.TaskList;
 import com.taskify.entities.TaskPriority;
 import com.taskify.entities.TaskStatus;
 import com.taskify.exceptions.TaskListNotFoundException;
 import com.taskify.exceptions.TaskNotFoundException;
+import com.taskify.mappers.TaskMapper;
 import com.taskify.repositories.TaskListRepository;
 import com.taskify.repositories.TaskRepository;
 import com.taskify.services.impl.TaskServiceImpl;
@@ -29,15 +33,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class TaskServiceTest {
 
   @Mock private TaskRepository taskRepository;
-
   @Mock private TaskListRepository taskListRepository;
-
+  @Mock private TaskMapper taskMapper;
   @InjectMocks private TaskServiceImpl taskService;
 
   private UUID taskListId;
   private UUID taskId;
   private TaskList taskList;
   private Task task;
+  private TaskDto taskDto;
 
   @BeforeEach
   void setUp() {
@@ -55,31 +59,58 @@ class TaskServiceTest {
     task.setPriority(TaskPriority.MEDIUM);
     task.setStatus(TaskStatus.OPEN);
     task.setTaskList(taskList);
+
+    taskDto =
+        new TaskDto(
+            task.getId(),
+            task.getTitle(),
+            task.getDescription(),
+            task.getDueDate(),
+            task.getPriority(),
+            task.getStatus());
   }
 
   @Test
   @DisplayName("Should create a task successfully")
   void shouldCreateTaskSuccessfully() {
-    when(taskListRepository.findById(taskListId)).thenReturn(Optional.of(taskList));
-    when(taskRepository.save(any(Task.class))).thenReturn(task);
+    CreateTaskRequest request =
+        new CreateTaskRequest(
+            "New Task",
+            "Description for new task",
+            LocalDateTime.now().plusDays(1),
+            TaskPriority.LOW);
 
-    Task createdTask = taskService.createTask(taskListId, task);
+    when(taskListRepository.findById(taskListId)).thenReturn(Optional.of(taskList));
+    when(taskMapper.fromCreateRequest(request)).thenReturn(task);
+    when(taskRepository.save(any(Task.class))).thenReturn(task);
+    when(taskMapper.toDto(task)).thenReturn(taskDto);
+
+    TaskDto createdTask = taskService.createTask(taskListId, request);
 
     assertNotNull(createdTask);
-    assertEquals(task.getTitle(), createdTask.getTitle());
-    assertEquals(TaskStatus.OPEN, createdTask.getStatus());
-    assertEquals(taskListId, createdTask.getTaskList().getId());
+    assertEquals(taskDto.title(), createdTask.title());
+    assertEquals(TaskStatus.OPEN, createdTask.status());
     verify(taskListRepository, times(1)).findById(taskListId);
     verify(taskRepository, times(1)).save(task);
+    verify(taskMapper, times(1)).fromCreateRequest(request);
+    verify(taskMapper, times(1)).toDto(task);
   }
 
   @Test
   @DisplayName(
       "Should throw TaskListNotFoundException when creating task for non-existent task list")
   void shouldThrowTaskListNotFoundExceptionWhenCreatingTaskForNonExistentTaskList() {
+    CreateTaskRequest request =
+        new CreateTaskRequest(
+            "New Task",
+            "Description for new task",
+            LocalDateTime.now().plusDays(1),
+            TaskPriority.LOW);
+
     when(taskListRepository.findById(taskListId)).thenReturn(Optional.empty());
 
-    assertThrows(TaskListNotFoundException.class, () -> taskService.createTask(taskListId, task));
+    assertThrows(
+        TaskListNotFoundException.class, () -> taskService.createTask(taskListId, request));
     verify(taskListRepository, times(1)).findById(taskListId);
     verify(taskRepository, never()).save(any(Task.class));
   }
@@ -88,14 +119,16 @@ class TaskServiceTest {
   @DisplayName("Should list tasks for a given task list")
   void shouldListTasksForGivenTaskList() {
     when(taskRepository.findByTaskListId(taskListId)).thenReturn(List.of(task));
+    when(taskMapper.toDto(task)).thenReturn(taskDto);
 
-    List<Task> tasks = taskService.listTasks(taskListId);
+    List<TaskDto> tasks = taskService.listTasks(taskListId);
 
     assertNotNull(tasks);
     assertFalse(tasks.isEmpty());
     assertEquals(1, tasks.size());
-    assertEquals(task.getTitle(), tasks.get(0).getTitle());
+    assertEquals(taskDto.title(), tasks.getFirst().title());
     verify(taskRepository, times(1)).findByTaskListId(taskListId);
+    verify(taskMapper, times(1)).toDto(task);
   }
 
   @Test
@@ -103,70 +136,101 @@ class TaskServiceTest {
   void shouldReturnEmptyListWhenNoTasksFoundForGivenTaskList() {
     when(taskRepository.findByTaskListId(taskListId)).thenReturn(Collections.emptyList());
 
-    List<Task> tasks = taskService.listTasks(taskListId);
+    List<TaskDto> tasks = taskService.listTasks(taskListId);
 
     assertNotNull(tasks);
     assertTrue(tasks.isEmpty());
     verify(taskRepository, times(1)).findByTaskListId(taskListId);
+    verify(taskMapper, never()).toDto(any(Task.class));
   }
 
   @Test
   @DisplayName("Should get a task by task list ID and task ID")
   void shouldGetTaskByTaskListIdAndTaskId() {
     when(taskRepository.findByTaskListIdAndId(taskListId, taskId)).thenReturn(Optional.of(task));
+    when(taskMapper.toDto(task)).thenReturn(taskDto);
 
-    Optional<Task> foundTask = taskService.getTask(taskListId, taskId);
+    TaskDto foundTask = taskService.getTask(taskListId, taskId);
 
-    assertTrue(foundTask.isPresent());
-    assertEquals(task.getTitle(), foundTask.get().getTitle());
+    assertNotNull(foundTask);
+    assertEquals(taskDto.title(), foundTask.title());
     verify(taskRepository, times(1)).findByTaskListIdAndId(taskListId, taskId);
+    verify(taskMapper, times(1)).toDto(task);
   }
 
   @Test
-  @DisplayName("Should return empty optional when task not found by task list ID and task ID")
-  void shouldReturnEmptyOptionalWhenTaskNotFoundByTaskListIdAndTaskId() {
+  @DisplayName("Should throw TaskNotFoundException when task not found by task list ID and task ID")
+  void shouldThrowTaskNotFoundExceptionWhenTaskNotFoundByTaskListIdAndTaskId() {
     when(taskRepository.findByTaskListIdAndId(taskListId, taskId)).thenReturn(Optional.empty());
 
-    Optional<Task> foundTask = taskService.getTask(taskListId, taskId);
-
-    assertTrue(foundTask.isEmpty());
+    assertThrows(TaskNotFoundException.class, () -> taskService.getTask(taskListId, taskId));
     verify(taskRepository, times(1)).findByTaskListIdAndId(taskListId, taskId);
+    verify(taskMapper, never()).toDto(any(Task.class));
   }
 
   @Test
   @DisplayName("Should update a task successfully")
   void shouldUpdateTaskSuccessfully() {
-    Task updatedTaskDetails = new Task();
-    updatedTaskDetails.setTitle("Updated Task Title");
-    updatedTaskDetails.setDescription("Updated Description");
-    updatedTaskDetails.setDueDate(LocalDateTime.now().plusDays(10));
-    updatedTaskDetails.setPriority(TaskPriority.HIGH);
-    updatedTaskDetails.setStatus(TaskStatus.CLOSED);
+    UpdateTaskRequest request =
+        new UpdateTaskRequest(
+            "Updated Task Title",
+            "Updated Description",
+            LocalDateTime.now().plusDays(10),
+            TaskPriority.HIGH,
+            TaskStatus.CLOSED);
+
+    Task updatedTask = new Task();
+    updatedTask.setId(taskId);
+    updatedTask.setTitle(request.title());
+    updatedTask.setDescription(request.description());
+    updatedTask.setDueDate(request.dueDate());
+    updatedTask.setPriority(request.priority());
+    updatedTask.setStatus(request.status());
+    updatedTask.setTaskList(taskList);
+
+    TaskDto updatedTaskDto =
+        new TaskDto(
+            updatedTask.getId(),
+            updatedTask.getTitle(),
+            updatedTask.getDescription(),
+            updatedTask.getDueDate(),
+            updatedTask.getPriority(),
+            updatedTask.getStatus());
 
     when(taskRepository.findByTaskListIdAndId(taskListId, taskId)).thenReturn(Optional.of(task));
-    when(taskRepository.save(any(Task.class))).thenReturn(task);
+    when(taskMapper.fromUpdateRequest(request)).thenReturn(updatedTask);
+    when(taskRepository.save(any(Task.class))).thenReturn(updatedTask);
+    when(taskMapper.toDto(updatedTask)).thenReturn(updatedTaskDto);
 
-    Task result = taskService.updateTask(taskListId, taskId, updatedTaskDetails);
+    TaskDto result = taskService.updateTask(taskListId, taskId, request);
 
     assertNotNull(result);
-    assertEquals(updatedTaskDetails.getTitle(), result.getTitle());
-    assertEquals(updatedTaskDetails.getDescription(), result.getDescription());
-    assertEquals(updatedTaskDetails.getDueDate(), result.getDueDate());
-    assertEquals(updatedTaskDetails.getPriority(), result.getPriority());
-    assertEquals(updatedTaskDetails.getStatus(), result.getStatus());
+    assertEquals(updatedTaskDto.title(), result.title());
+    assertEquals(updatedTaskDto.description(), result.description());
+    assertEquals(updatedTaskDto.dueDate(), result.dueDate());
+    assertEquals(updatedTaskDto.priority(), result.priority());
+    assertEquals(updatedTaskDto.status(), result.status());
     verify(taskRepository, times(1)).findByTaskListIdAndId(taskListId, taskId);
     verify(taskRepository, times(1)).save(task);
+    verify(taskMapper, times(1)).fromUpdateRequest(request);
+    verify(taskMapper, times(1)).toDto(updatedTask);
   }
 
   @Test
   @DisplayName("Should throw TaskNotFoundException when updating non-existent task")
   void shouldThrowTaskNotFoundExceptionWhenUpdatingNonExistentTask() {
-    Task updatedTaskDetails = new Task();
+    UpdateTaskRequest request =
+        new UpdateTaskRequest(
+            "Updated Task Title",
+            "Updated Description",
+            LocalDateTime.now().plusDays(10),
+            TaskPriority.HIGH,
+            TaskStatus.CLOSED);
+
     when(taskRepository.findByTaskListIdAndId(taskListId, taskId)).thenReturn(Optional.empty());
 
     assertThrows(
-        TaskNotFoundException.class,
-        () -> taskService.updateTask(taskListId, taskId, updatedTaskDetails));
+        TaskNotFoundException.class, () -> taskService.updateTask(taskListId, taskId, request));
     verify(taskRepository, times(1)).findByTaskListIdAndId(taskListId, taskId);
     verify(taskRepository, never()).save(any(Task.class));
   }
@@ -184,70 +248,137 @@ class TaskServiceTest {
   @Test
   @DisplayName("Should update task with partial fields successfully")
   void shouldUpdateTaskWithPartialFieldsSuccessfully() {
-    Task updatedTaskDetails = new Task();
-    updatedTaskDetails.setTitle("Updated Task Title");
+    UpdateTaskRequest request = new UpdateTaskRequest("Updated Task Title", null, null, null, null);
+
+    Task updatedTask = new Task();
+    updatedTask.setId(taskId);
+    updatedTask.setTitle(request.title());
+    updatedTask.setDescription(task.getDescription());
+    updatedTask.setDueDate(task.getDueDate());
+    updatedTask.setPriority(task.getPriority());
+    updatedTask.setStatus(task.getStatus());
+    updatedTask.setTaskList(taskList);
+
+    TaskDto updatedTaskDto =
+        new TaskDto(
+            updatedTask.getId(),
+            updatedTask.getTitle(),
+            updatedTask.getDescription(),
+            updatedTask.getDueDate(),
+            updatedTask.getPriority(),
+            updatedTask.getStatus());
 
     when(taskRepository.findByTaskListIdAndId(taskListId, taskId)).thenReturn(Optional.of(task));
-    when(taskRepository.save(any(Task.class))).thenReturn(task);
+    when(taskMapper.fromUpdateRequest(request)).thenReturn(updatedTask);
+    when(taskRepository.save(any(Task.class))).thenReturn(updatedTask);
+    when(taskMapper.toDto(updatedTask)).thenReturn(updatedTaskDto);
 
-    Task result = taskService.updateTask(taskListId, taskId, updatedTaskDetails);
+    TaskDto result = taskService.updateTask(taskListId, taskId, request);
 
     assertNotNull(result);
-    assertEquals(updatedTaskDetails.getTitle(), result.getTitle());
-    assertEquals(task.getDescription(), result.getDescription());
-    assertEquals(task.getDueDate(), result.getDueDate());
-    assertEquals(task.getPriority(), result.getPriority());
-    assertEquals(task.getStatus(), result.getStatus());
+    assertEquals(updatedTaskDto.title(), result.title());
+    assertEquals(taskDto.description(), result.description());
+    assertEquals(taskDto.dueDate(), result.dueDate());
+    assertEquals(taskDto.priority(), result.priority());
+    assertEquals(taskDto.status(), result.status());
     verify(taskRepository, times(1)).findByTaskListIdAndId(taskListId, taskId);
     verify(taskRepository, times(1)).save(task);
+    verify(taskMapper, times(1)).fromUpdateRequest(request);
+    verify(taskMapper, times(1)).toDto(updatedTask);
   }
 
   @Test
   @DisplayName("Should update task due date successfully through updateTask")
   void shouldUpdateTaskDueDateSuccessfullyThroughUpdateTask() {
-    Task updatedTaskDetails = new Task();
-    updatedTaskDetails.setDueDate(LocalDateTime.now().plusDays(5));
+    UpdateTaskRequest request =
+        new UpdateTaskRequest(null, null, LocalDateTime.now().plusDays(5), null, null);
+
+    Task updatedTask = new Task();
+    updatedTask.setId(taskId);
+    updatedTask.setTitle(task.getTitle());
+    updatedTask.setDescription(task.getDescription());
+    updatedTask.setDueDate(request.dueDate());
+    updatedTask.setPriority(task.getPriority());
+    updatedTask.setStatus(task.getStatus());
+    updatedTask.setTaskList(taskList);
+
+    TaskDto updatedTaskDto =
+        new TaskDto(
+            updatedTask.getId(),
+            updatedTask.getTitle(),
+            updatedTask.getDescription(),
+            updatedTask.getDueDate(),
+            updatedTask.getPriority(),
+            updatedTask.getStatus());
 
     when(taskRepository.findByTaskListIdAndId(taskListId, taskId)).thenReturn(Optional.of(task));
-    when(taskRepository.save(any(Task.class))).thenReturn(task);
+    when(taskMapper.fromUpdateRequest(request)).thenReturn(updatedTask);
+    when(taskRepository.save(any(Task.class))).thenReturn(updatedTask);
+    when(taskMapper.toDto(updatedTask)).thenReturn(updatedTaskDto);
 
-    Task result = taskService.updateTask(taskListId, taskId, updatedTaskDetails);
+    TaskDto result = taskService.updateTask(taskListId, taskId, request);
 
     assertNotNull(result);
-    assertEquals(updatedTaskDetails.getDueDate(), result.getDueDate());
+    assertEquals(updatedTaskDto.dueDate(), result.dueDate());
     verify(taskRepository, times(1)).findByTaskListIdAndId(taskListId, taskId);
     verify(taskRepository, times(1)).save(task);
+    verify(taskMapper, times(1)).fromUpdateRequest(request);
+    verify(taskMapper, times(1)).toDto(updatedTask);
   }
 
   @Test
   @DisplayName("Should update task priority successfully through updateTask")
   void shouldUpdateTaskPrioritySuccessfullyThroughUpdateTask() {
-    Task updatedTaskDetails = new Task();
-    updatedTaskDetails.setPriority(TaskPriority.HIGH);
+    UpdateTaskRequest request = new UpdateTaskRequest(null, null, null, TaskPriority.HIGH, null);
+
+    Task updatedTask = new Task();
+    updatedTask.setId(taskId);
+    updatedTask.setTitle(task.getTitle());
+    updatedTask.setDescription(task.getDescription());
+    updatedTask.setDueDate(task.getDueDate());
+    updatedTask.setPriority(request.priority());
+    updatedTask.setStatus(task.getStatus());
+    updatedTask.setTaskList(taskList);
+
+    TaskDto updatedTaskDto =
+        new TaskDto(
+            updatedTask.getId(),
+            updatedTask.getTitle(),
+            updatedTask.getDescription(),
+            updatedTask.getDueDate(),
+            updatedTask.getPriority(),
+            updatedTask.getStatus());
 
     when(taskRepository.findByTaskListIdAndId(taskListId, taskId)).thenReturn(Optional.of(task));
-    when(taskRepository.save(any(Task.class))).thenReturn(task);
+    when(taskMapper.fromUpdateRequest(request)).thenReturn(updatedTask);
+    when(taskRepository.save(any(Task.class))).thenReturn(updatedTask);
+    when(taskMapper.toDto(updatedTask)).thenReturn(updatedTaskDto);
 
-    Task result = taskService.updateTask(taskListId, taskId, updatedTaskDetails);
+    TaskDto result = taskService.updateTask(taskListId, taskId, request);
 
     assertNotNull(result);
-    assertEquals(updatedTaskDetails.getPriority(), result.getPriority());
+    assertEquals(updatedTaskDto.priority(), result.priority());
     verify(taskRepository, times(1)).findByTaskListIdAndId(taskListId, taskId);
     verify(taskRepository, times(1)).save(task);
+    verify(taskMapper, times(1)).fromUpdateRequest(request);
+    verify(taskMapper, times(1)).toDto(updatedTask);
   }
 
   @Test
   @DisplayName(
       "Should throw IllegalArgumentException when updating due date with past date through updateTask")
   void shouldThrowIllegalArgumentExceptionWhenUpdatingDueDateWithPastDateThroughUpdateTask() {
-    Task updatedTaskDetails = new Task();
-    updatedTaskDetails.setDueDate(LocalDateTime.now().minusDays(1));
+    UpdateTaskRequest request =
+        new UpdateTaskRequest(null, null, LocalDateTime.now().minusDays(1), null, null);
+
+    Task updatedTask = new Task();
+    updatedTask.setDueDate(request.dueDate());
 
     when(taskRepository.findByTaskListIdAndId(taskListId, taskId)).thenReturn(Optional.of(task));
+    when(taskMapper.fromUpdateRequest(request)).thenReturn(updatedTask);
 
     assertThrows(
-        IllegalArgumentException.class,
-        () -> taskService.updateTask(taskListId, taskId, updatedTaskDetails));
+        IllegalArgumentException.class, () -> taskService.updateTask(taskListId, taskId, request));
     verify(taskRepository, times(1)).findByTaskListIdAndId(taskListId, taskId);
     verify(taskRepository, never()).save(any(Task.class));
   }

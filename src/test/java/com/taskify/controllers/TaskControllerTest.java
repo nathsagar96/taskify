@@ -4,8 +4,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -19,11 +18,9 @@ import com.taskify.entities.TaskPriority;
 import com.taskify.entities.TaskStatus;
 import com.taskify.exceptions.TaskListNotFoundException;
 import com.taskify.exceptions.TaskNotFoundException;
-import com.taskify.mappers.TaskMapper;
 import com.taskify.services.TaskService;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,11 +39,9 @@ class TaskControllerTest {
   @Autowired private ObjectMapper objectMapper;
   @Autowired private MockMvc mockMvc;
   @MockitoBean private TaskService taskService;
-  @MockitoBean private TaskMapper taskMapper;
 
   private TaskList taskList;
   private Task task1;
-  private Task task2;
   private TaskDto taskDto1;
   private TaskDto taskDto2;
 
@@ -66,7 +61,7 @@ class TaskControllerTest {
     task1.setStatus(TaskStatus.OPEN);
     task1.setTaskList(taskList);
 
-    task2 = new Task();
+    Task task2 = new Task();
     task2.setId(UUID.randomUUID());
     task2.setTitle("Schedule Team Meeting");
     task2.setDescription("Arrange a meeting with the team to discuss progress.");
@@ -99,17 +94,15 @@ class TaskControllerTest {
       "GET /api/v1/task-lists/{task_list_id}/tasks - Should list all tasks for a given task list")
   void shouldListAllTasksForGivenTaskList() throws Exception {
     // Arrange
-    when(taskService.listTasks(taskList.getId())).thenReturn(List.of(task1, task2));
-    when(taskMapper.toDto(task1)).thenReturn(taskDto1);
-    when(taskMapper.toDto(task2)).thenReturn(taskDto2);
+    when(taskService.listTasks(taskList.getId())).thenReturn(List.of(taskDto1, taskDto2));
 
     // Act & Assert
     mockMvc
         .perform(get("/api/v1/task-lists/{task_list_id}/tasks", taskList.getId()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(2)))
-        .andExpect(jsonPath("$[0].title", is(task1.getTitle())))
-        .andExpect(jsonPath("$[1].title", is(task2.getTitle())));
+        .andExpect(jsonPath("$[0].title", is(taskDto1.title())))
+        .andExpect(jsonPath("$[1].title", is(taskDto2.title())));
   }
 
   @Test
@@ -139,27 +132,17 @@ class TaskControllerTest {
             LocalDateTime.now().plusDays(1),
             TaskPriority.LOW);
 
-    Task newTask = new Task();
-    newTask.setId(UUID.randomUUID());
-    newTask.setTitle(request.title());
-    newTask.setDescription(request.description());
-    newTask.setDueDate(request.dueDate());
-    newTask.setPriority(request.priority());
-    newTask.setStatus(TaskStatus.OPEN);
-    newTask.setTaskList(taskList);
-
     TaskDto newTaskDto =
         new TaskDto(
-            newTask.getId(),
-            newTask.getTitle(),
-            newTask.getDescription(),
-            newTask.getDueDate(),
-            newTask.getPriority(),
-            newTask.getStatus());
+            UUID.randomUUID(),
+            request.title(),
+            request.description(),
+            request.dueDate(),
+            request.priority(),
+            TaskStatus.OPEN);
 
-    when(taskService.createTask(eq(taskList.getId()), any(Task.class))).thenReturn(newTask);
-    when(taskMapper.fromCreateRequest(request)).thenReturn(newTask);
-    when(taskMapper.toDto(newTask)).thenReturn(newTaskDto);
+    when(taskService.createTask(eq(taskList.getId()), any(CreateTaskRequest.class)))
+        .thenReturn(newTaskDto);
 
     // Act & Assert
     mockMvc
@@ -185,14 +168,8 @@ class TaskControllerTest {
             TaskPriority.LOW);
 
     UUID nonExistentTaskListId = UUID.randomUUID();
-    Task taskToCreate = new Task();
-    taskToCreate.setTitle(request.title());
-    taskToCreate.setDescription(request.description());
-    taskToCreate.setDueDate(request.dueDate());
-    taskToCreate.setPriority(request.priority());
 
-    when(taskMapper.fromCreateRequest(request)).thenReturn(taskToCreate);
-    when(taskService.createTask(eq(nonExistentTaskListId), eq(taskToCreate)))
+    when(taskService.createTask(eq(nonExistentTaskListId), any(CreateTaskRequest.class)))
         .thenThrow(
             new TaskListNotFoundException("Task List not found with ID: " + nonExistentTaskListId));
 
@@ -211,8 +188,7 @@ class TaskControllerTest {
   @DisplayName("GET /api/v1/task-lists/{task_list_id}/tasks/{task_id} - Should get a task by ID")
   void shouldGetTaskById() throws Exception {
     // Arrange
-    when(taskService.getTask(taskList.getId(), task1.getId())).thenReturn(Optional.of(task1));
-    when(taskMapper.toDto(task1)).thenReturn(taskDto1);
+    when(taskService.getTask(taskList.getId(), task1.getId())).thenReturn(taskDto1);
 
     // Act & Assert
     mockMvc
@@ -222,7 +198,7 @@ class TaskControllerTest {
                 taskList.getId(),
                 task1.getId()))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.title", is(task1.getTitle())));
+        .andExpect(jsonPath("$.title", is(taskDto1.title())));
   }
 
   @Test
@@ -230,15 +206,15 @@ class TaskControllerTest {
       "GET /api/v1/task-lists/{task_list_id}/tasks/{task_id} - Should return 404 if task not found")
   void shouldReturn404IfTaskNotFound() throws Exception {
     // Arrange
-    when(taskService.getTask(taskList.getId(), UUID.randomUUID())).thenReturn(Optional.empty());
+    UUID taskId = UUID.randomUUID();
+    when(taskService.getTask(taskList.getId(), taskId))
+        .thenThrow(
+            new TaskNotFoundException(
+                "Task List not found with ID: " + taskId + " in Task List: " + taskList.getId()));
 
     // Act & Assert
     mockMvc
-        .perform(
-            get(
-                "/api/v1/task-lists/{task_list_id}/tasks/{task_id}",
-                taskList.getId(),
-                UUID.randomUUID()))
+        .perform(get("/api/v1/task-lists/{task_list_id}/tasks/{task_id}", taskList.getId(), taskId))
         .andExpect(status().isNotFound());
   }
 
@@ -255,35 +231,18 @@ class TaskControllerTest {
             TaskPriority.HIGH,
             TaskStatus.CLOSED);
 
-    Task taskToUpdate = new Task();
-    taskToUpdate.setTitle(request.title());
-    taskToUpdate.setDescription(request.description());
-    taskToUpdate.setDueDate(request.dueDate());
-    taskToUpdate.setPriority(request.priority());
-    taskToUpdate.setStatus(request.status());
-
-    Task updatedTask = new Task();
-    updatedTask.setId(task1.getId());
-    updatedTask.setTitle(request.title());
-    updatedTask.setDescription(request.description());
-    updatedTask.setDueDate(request.dueDate());
-    updatedTask.setPriority(request.priority());
-    updatedTask.setStatus(request.status());
-    updatedTask.setTaskList(taskList);
-
     TaskDto updatedTaskDto =
         new TaskDto(
-            updatedTask.getId(),
-            updatedTask.getTitle(),
-            updatedTask.getDescription(),
-            updatedTask.getDueDate(),
-            updatedTask.getPriority(),
-            updatedTask.getStatus());
+            task1.getId(),
+            request.title(),
+            request.description(),
+            request.dueDate(),
+            request.priority(),
+            request.status());
 
-    when(taskMapper.fromUpdateRequest(request)).thenReturn(taskToUpdate);
-    when(taskService.updateTask(eq(taskList.getId()), eq(task1.getId()), eq(taskToUpdate)))
-        .thenReturn(updatedTask);
-    when(taskMapper.toDto(updatedTask)).thenReturn(updatedTaskDto);
+    when(taskService.updateTask(
+            eq(taskList.getId()), eq(task1.getId()), any(UpdateTaskRequest.class)))
+        .thenReturn(updatedTaskDto);
 
     // Act & Assert
     mockMvc
@@ -295,10 +254,10 @@ class TaskControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.title", is(request.title())))
-        .andExpect(jsonPath("$.description", is(request.description())))
-        .andExpect(jsonPath("$.priority", is(request.priority().name())))
-        .andExpect(jsonPath("$.status", is(request.status().name())));
+        .andExpect(jsonPath("$.title", is(updatedTaskDto.title())))
+        .andExpect(jsonPath("$.description", is(updatedTaskDto.description())))
+        .andExpect(jsonPath("$.priority", is(updatedTaskDto.priority().name())))
+        .andExpect(jsonPath("$.status", is(updatedTaskDto.status().name())));
   }
 
   @Test
@@ -315,15 +274,9 @@ class TaskControllerTest {
             TaskStatus.CLOSED);
 
     UUID nonExistentTaskId = UUID.randomUUID();
-    Task taskToUpdate = new Task();
-    taskToUpdate.setTitle(request.title());
-    taskToUpdate.setDescription(request.description());
-    taskToUpdate.setDueDate(request.dueDate());
-    taskToUpdate.setPriority(request.priority());
-    taskToUpdate.setStatus(request.status());
 
-    when(taskMapper.fromUpdateRequest(request)).thenReturn(taskToUpdate);
-    when(taskService.updateTask(eq(taskList.getId()), eq(nonExistentTaskId), eq(taskToUpdate)))
+    when(taskService.updateTask(
+            eq(taskList.getId()), eq(nonExistentTaskId), any(UpdateTaskRequest.class)))
         .thenThrow(
             new TaskNotFoundException(
                 "Task not found with ID: "
@@ -367,15 +320,6 @@ class TaskControllerTest {
                 task1.getId()))
         .andExpect(status().isNoContent());
 
-    // Verify deletion
-    when(taskService.getTask(taskList.getId(), task1.getId())).thenReturn(Optional.empty());
-
-    mockMvc
-        .perform(
-            get(
-                "/api/v1/task-lists/{task_list_id}/tasks/{task_id}",
-                taskList.getId(),
-                task1.getId()))
-        .andExpect(status().isNotFound());
+    verify(taskService, times(1)).deleteTask(taskList.getId(), task1.getId());
   }
 }

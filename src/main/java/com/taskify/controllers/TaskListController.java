@@ -3,8 +3,6 @@ package com.taskify.controllers;
 import com.taskify.dtos.CreateTaskListRequest;
 import com.taskify.dtos.TaskListDto;
 import com.taskify.dtos.UpdateTaskListRequest;
-import com.taskify.entities.TaskList;
-import com.taskify.mappers.TaskListMapper;
 import com.taskify.services.TaskListService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,11 +20,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/api/v1/task-lists")
 public class TaskListController {
   private final TaskListService taskListService;
-  private final TaskListMapper taskListMapper;
 
-  public TaskListController(TaskListService taskListService, TaskListMapper taskListMapper) {
+  public TaskListController(TaskListService taskListService) {
     this.taskListService = taskListService;
-    this.taskListMapper = taskListMapper;
   }
 
   @Operation(summary = "List all task lists")
@@ -38,9 +34,7 @@ public class TaskListController {
       })
   @GetMapping
   public ResponseEntity<List<TaskListDto>> listTaskLists() {
-    List<TaskListDto> taskLists =
-        taskListService.listTaskLists().stream().map(taskListMapper::toDto).toList();
-    return ResponseEntity.ok(taskLists);
+    return ResponseEntity.status(HttpStatus.OK).body(taskListService.listTaskLists());
   }
 
   @Operation(summary = "Create a new task list")
@@ -52,9 +46,7 @@ public class TaskListController {
   @PostMapping
   public ResponseEntity<TaskListDto> createTaskList(
       @Valid @RequestBody CreateTaskListRequest request) {
-    TaskList createdTaskList =
-        taskListService.createTaskList(taskListMapper.fromCreateRequest(request));
-    return ResponseEntity.status(HttpStatus.CREATED).body(taskListMapper.toDto(createdTaskList));
+    return ResponseEntity.status(HttpStatus.CREATED).body(taskListService.createTaskList(request));
   }
 
   @Operation(summary = "Get a task list by ID")
@@ -65,11 +57,7 @@ public class TaskListController {
       })
   @GetMapping(path = "/{task_list_id}")
   public ResponseEntity<TaskListDto> getTaskList(@PathVariable("task_list_id") UUID taskListId) {
-    return taskListService
-        .getTaskList(taskListId)
-        .map(taskListMapper::toDto)
-        .map(ResponseEntity::ok)
-        .orElse(ResponseEntity.notFound().build());
+    return ResponseEntity.status(HttpStatus.OK).body(taskListService.getTaskList(taskListId));
   }
 
   @Operation(summary = "Update an existing task list")
@@ -83,9 +71,8 @@ public class TaskListController {
   public ResponseEntity<TaskListDto> updateTaskList(
       @PathVariable("task_list_id") UUID taskListId,
       @Valid @RequestBody UpdateTaskListRequest request) {
-    TaskList updatedTaskList =
-        taskListService.updateTaskList(taskListId, taskListMapper.fromUpdateRequest(request));
-    return ResponseEntity.ok(taskListMapper.toDto(updatedTaskList));
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(taskListService.updateTaskList(taskListId, request));
   }
 
   @Operation(summary = "Delete a task list by ID")
@@ -93,7 +80,8 @@ public class TaskListController {
       value = {@ApiResponse(responseCode = "204", description = "Task list deleted successfully")})
   @DeleteMapping(path = "/{task_list_id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteTaskList(@PathVariable("task_list_id") UUID taskListId) {
+  public ResponseEntity<Void> deleteTaskList(@PathVariable("task_list_id") UUID taskListId) {
     taskListService.deleteTaskList(taskListId);
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

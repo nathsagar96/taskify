@@ -1,11 +1,14 @@
 package com.taskify.services.impl;
 
+import com.taskify.dtos.CreateTaskListRequest;
+import com.taskify.dtos.TaskListDto;
+import com.taskify.dtos.UpdateTaskListRequest;
 import com.taskify.entities.TaskList;
 import com.taskify.exceptions.TaskListNotFoundException;
+import com.taskify.mappers.TaskListMapper;
 import com.taskify.repositories.TaskListRepository;
 import com.taskify.services.TaskListService;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,30 +18,38 @@ import org.springframework.transaction.annotation.Transactional;
 public class TaskListServiceImpl implements TaskListService {
 
   private final TaskListRepository taskListRepository;
+  private final TaskListMapper taskListMapper;
 
-  public TaskListServiceImpl(TaskListRepository taskListRepository) {
+  public TaskListServiceImpl(TaskListRepository taskListRepository, TaskListMapper taskListMapper) {
     this.taskListRepository = taskListRepository;
+    this.taskListMapper = taskListMapper;
   }
 
   @Override
-  public List<TaskList> listTaskLists() {
-    return taskListRepository.findAll();
-  }
-
-  @Override
-  @Transactional
-  public TaskList createTaskList(TaskList taskList) {
-    return taskListRepository.save(taskList);
-  }
-
-  @Override
-  public Optional<TaskList> getTaskList(UUID id) {
-    return taskListRepository.findById(id);
+  public List<TaskListDto> listTaskLists() {
+    return taskListRepository.findAll().stream().map(taskListMapper::toDto).toList();
   }
 
   @Override
   @Transactional
-  public TaskList updateTaskList(UUID taskListId, TaskList taskList) {
+  public TaskListDto createTaskList(CreateTaskListRequest request) {
+    TaskList taskList = taskListMapper.fromCreateRequest(request);
+    TaskList createdTaskList = taskListRepository.save(taskList);
+    return taskListMapper.toDto(createdTaskList);
+  }
+
+  @Override
+  public TaskListDto getTaskList(UUID id) {
+    return taskListRepository
+        .findById(id)
+        .map(taskListMapper::toDto)
+        .orElseThrow(() -> new TaskListNotFoundException("Task List not found with ID: " + id));
+  }
+
+  @Override
+  @Transactional
+  public TaskListDto updateTaskList(UUID taskListId, UpdateTaskListRequest request) {
+    TaskList taskList = taskListMapper.fromUpdateRequest(request);
     TaskList existingTaskList =
         taskListRepository
             .findById(taskListId)
@@ -48,7 +59,8 @@ public class TaskListServiceImpl implements TaskListService {
     existingTaskList.setTitle(taskList.getTitle());
     existingTaskList.setDescription(taskList.getDescription());
 
-    return taskListRepository.save(existingTaskList);
+    TaskList updatedTaskList = taskListRepository.save(existingTaskList);
+    return taskListMapper.toDto(updatedTaskList);
   }
 
   @Override
