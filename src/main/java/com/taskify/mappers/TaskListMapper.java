@@ -4,12 +4,66 @@ import com.taskify.dtos.CreateTaskListRequest;
 import com.taskify.dtos.TaskListDto;
 import com.taskify.dtos.UpdateTaskListRequest;
 import com.taskify.entities.TaskList;
+import com.taskify.entities.TaskStatus;
+import org.springframework.stereotype.Component;
 
-public interface TaskListMapper {
+import java.util.List;
 
-  TaskList fromCreateRequest(CreateTaskListRequest request);
+@Component
+public class TaskListMapper {
 
-  TaskList fromUpdateRequest(UpdateTaskListRequest request);
+    private final TaskMapper taskMapper;
 
-  TaskListDto toDto(TaskList taskList);
+    public TaskListMapper(TaskMapper taskMapper) {
+        this.taskMapper = taskMapper;
+    }
+
+    public TaskList fromCreateRequest(CreateTaskListRequest request) {
+        if (request == null) {
+            return null;
+        }
+
+        TaskList taskList = new TaskList();
+        taskList.setTitle(request.title());
+        taskList.setDescription(request.description());
+
+        return taskList;
+    }
+
+    public TaskList fromUpdateRequest(UpdateTaskListRequest request) {
+        if (request == null) {
+            return null;
+        }
+
+        TaskList taskList = new TaskList();
+        taskList.setTitle(request.title());
+        taskList.setDescription(request.description());
+        return taskList;
+    }
+
+    public TaskListDto toDto(TaskList taskList) {
+        if (taskList == null) {
+            return null;
+        }
+
+        if (taskList.getTasks() == null) {
+            return new TaskListDto(
+                    taskList.getId(), taskList.getTitle(), taskList.getDescription(), 0, 0.0, List.of());
+        }
+
+        int count = taskList.getTasks().size();
+
+        double progress =
+                taskList.getTasks().stream().filter(task -> task.getStatus() == TaskStatus.CLOSED).count()
+                        * 100.0
+                        / Math.max(count, 1);
+
+        return new TaskListDto(
+                taskList.getId(),
+                taskList.getTitle(),
+                taskList.getDescription(),
+                count,
+                progress,
+                taskList.getTasks().stream().map(taskMapper::toDto).toList());
+    }
 }

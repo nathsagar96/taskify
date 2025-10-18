@@ -1,7 +1,7 @@
 # Taskify 🚀
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Java](https://img.shields.io/badge/Java-21-blue.svg?logo=openjdk&logoColor=white)](https://openjdk.java.net/projects/jdk/21/)
+[![Java](https://img.shields.io/badge/Java-25-blue.svg?logo=openjdk&logoColor=white)](https://openjdk.java.net/projects/jdk/25/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-green.svg?logo=spring&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Maven](https://img.shields.io/badge/Maven-3.x-red.svg?logo=apache-maven&logoColor=white)](https://maven.apache.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-blue.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
@@ -29,7 +29,7 @@ productivity.
 ## Technologies Used 🛠️
 
 * **Spring Boot**: Framework for building robust, production-ready Spring applications.
-* **Java 21**: The latest LTS version of Java.
+* **Java 25**: The latest LTS version of Java.
 * **Spring Data JPA**: For simplified data access and persistence.
 * **Hibernate**: ORM framework for database interaction.
 * **PostgreSQL**: Relational database for data storage.
@@ -48,7 +48,7 @@ purposes.
 
 Before you begin, ensure you have the following installed:
 
-* **Java Development Kit (JDK) 21** or higher
+* **Java Development Kit (JDK) 25** or higher
 * **Maven 3.8.x** or higher
 * **Docker Desktop** (for running PostgreSQL via `compose.yaml`)
 * **Git**
@@ -67,7 +67,7 @@ Before you begin, ensure you have the following installed:
    This will start a PostgreSQL container in the background.
 3. **Build the project using Maven:**
    ```bash
-   ./mvnw clean install
+25   ./mvnw clean install
    ```
 
 ### Running the Application ▶️

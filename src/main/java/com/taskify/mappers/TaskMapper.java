@@ -4,12 +4,51 @@ import com.taskify.dtos.CreateTaskRequest;
 import com.taskify.dtos.TaskDto;
 import com.taskify.dtos.UpdateTaskRequest;
 import com.taskify.entities.Task;
+import org.springframework.stereotype.Component;
 
-public interface TaskMapper {
+@Component
+public class TaskMapper {
 
-  Task fromCreateRequest(CreateTaskRequest request);
+    public Task fromCreateRequest(CreateTaskRequest request) {
+        if (request == null) {
+            return null;
+        }
 
-  Task fromUpdateRequest(UpdateTaskRequest request);
+        Task task = new Task();
+        task.setTitle(request.title());
+        task.setDescription(request.description());
+        task.setDueDate(request.dueDate());
+        task.setPriority(request.priority());
 
-  TaskDto toDto(Task task);
+        return task;
+    }
+
+    public Task fromUpdateRequest(UpdateTaskRequest request) {
+        if (request == null) {
+            return null;
+        }
+
+        Task task = new Task();
+        task.setTitle(request.title());
+        task.setDescription(request.description());
+        task.setDueDate(request.dueDate());
+        task.setPriority(request.priority());
+        task.setStatus(request.status());
+
+        return task;
+    }
+
+    public TaskDto toDto(Task task) {
+        if (task == null) {
+            return null;
+        }
+
+        return new TaskDto(
+                task.getId(),
+                task.getTitle(),
+                task.getDescription(),
+                task.getDueDate(),
+                task.getPriority(),
+                task.getStatus());
+    }
 }
