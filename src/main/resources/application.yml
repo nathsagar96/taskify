@@ -20,13 +20,16 @@ spring:
 
 management:
   endpoints:
+    access:
+      default: NONE
     web:
       exposure:
         include: health,info,metrics
   endpoint:
     health:
-      show-details: always
+      access: READ_ONLY
+      show-details: ALWAYS
     info:
-      enabled: true
+      access: READ_ONLY
     metrics:
-      enabled: true
+      access: READ_ONLY
