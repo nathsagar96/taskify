@@ -67,7 +67,7 @@ Before you begin, ensure you have the following installed:
    This will start a PostgreSQL container in the background.
 3. **Build the project using Maven:**
    ```bash
-25   ./mvnw clean install
+   ./mvnw clean install
    ```
 
 ### Running the Application ▶️
