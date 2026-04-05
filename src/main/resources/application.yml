@@ -23,6 +23,13 @@ spring:
   threads:
     virtual:
       enabled: true
+  cache:
+    type: caffeine
+    cache-names:
+      - taskLists
+      - tasks
+    caffeine:
+      spec: maximumSize=500,expireAfterAccess=10m
 
 logging:
   structured:
