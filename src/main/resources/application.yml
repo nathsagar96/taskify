@@ -2,14 +2,17 @@ spring:
   application:
     name: taskify
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/taskdb}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    url: ${SPRING_DATASOURCE_URL:}
+    username: ${SPRING_DATASOURCE_USERNAME:}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     hikari:
+      pool-name: taskify-pool
       minimum-idle: 5
       maximum-pool-size: 20
       connection-timeout: 30000
       idle-timeout: 600000
+      max-lifetime: 1800000
+      leak-detection-threshold: 2000
   jpa:
     hibernate:
       ddl-auto: validate
@@ -17,19 +20,11 @@ spring:
   flyway:
     locations: classpath:db/migration
     baseline-on-migrate: true
+  threads:
+    virtual:
+      enabled: true
 
-management:
-  endpoints:
-    access:
-      default: NONE
-    web:
-      exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      access: READ_ONLY
-      show-details: ALWAYS
-    info:
-      access: READ_ONLY
-    metrics:
-      access: READ_ONLY
+logging:
+  structured:
+    format:
+      console: ecs

@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    hikari:
+      maximum-pool-size: 50
+      max-lifetime: 1800000
+      leak-detection-threshold: 0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: WHEN_AUTHORIZED
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
