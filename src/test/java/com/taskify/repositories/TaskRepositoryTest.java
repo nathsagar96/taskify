@@ -1,29 +1,30 @@
 package com.taskify.repositories;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.taskify.BaseDataJpaTest;
 import com.taskify.entities.Task;
 import com.taskify.entities.TaskList;
 import com.taskify.entities.TaskPriority;
 import com.taskify.entities.TaskStatus;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 
 class TaskRepositoryTest extends BaseDataJpaTest {
 
     @Autowired
     private TaskRepository taskRepository;
+
     @Autowired
     private TestEntityManager entityManager;
+
     private TaskList taskList;
     private Task task1;
     private Task task2;
@@ -69,8 +70,7 @@ class TaskRepositoryTest extends BaseDataJpaTest {
     @Test
     @DisplayName("Should find a task by task list ID and task ID")
     void shouldFindByTaskListIdAndId() {
-        Optional<Task> foundTask =
-                taskRepository.findByTaskListIdAndId(taskList.getId(), task1.getId());
+        Optional<Task> foundTask = taskRepository.findByTaskListIdAndId(taskList.getId(), task1.getId());
         assertTrue(foundTask.isPresent());
         assertEquals(task1.getTitle(), foundTask.get().getTitle());
     }
@@ -78,8 +78,7 @@ class TaskRepositoryTest extends BaseDataJpaTest {
     @Test
     @DisplayName("Should return empty optional if task not found by task list ID and task ID")
     void shouldReturnEmptyOptionalIfTaskNotFoundByTaskListIdAndId() {
-        Optional<Task> foundTask =
-                taskRepository.findByTaskListIdAndId(taskList.getId(), UUID.randomUUID());
+        Optional<Task> foundTask = taskRepository.findByTaskListIdAndId(taskList.getId(), UUID.randomUUID());
         assertTrue(foundTask.isEmpty());
     }
 

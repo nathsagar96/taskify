@@ -1,11 +1,10 @@
 package com.taskify.entities;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "tasks")
@@ -39,8 +38,7 @@ public class Task {
     @JoinColumn(name = "task_list_id")
     private TaskList taskList;
 
-    public Task() {
-    }
+    public Task() {}
 
     public Task(
             UUID id,

@@ -1,5 +1,7 @@
 package com.taskify.mappers;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.taskify.dtos.CreateTaskRequest;
 import com.taskify.dtos.TaskDto;
 import com.taskify.dtos.UpdateTaskRequest;
@@ -7,16 +9,13 @@ import com.taskify.entities.Task;
 import com.taskify.entities.TaskList;
 import com.taskify.entities.TaskPriority;
 import com.taskify.entities.TaskStatus;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class TaskMapperTest {
@@ -58,9 +57,8 @@ class TaskMapperTest {
     @Test
     @DisplayName("Should map CreateTaskRequest to Task entity")
     void shouldMapCreateTaskRequestToTaskEntity() {
-        CreateTaskRequest request =
-                new CreateTaskRequest(
-                        "New Task", "New Description", LocalDateTime.of(2025, 1, 1, 10, 0), TaskPriority.LOW);
+        CreateTaskRequest request = new CreateTaskRequest(
+                "New Task", "New Description", LocalDateTime.of(2025, 1, 1, 10, 0), TaskPriority.LOW);
 
         Task task = taskMapper.fromCreateRequest(request);
 
@@ -77,13 +75,12 @@ class TaskMapperTest {
     @Test
     @DisplayName("Should map UpdateTaskRequest to Task entity")
     void shouldMapUpdateTaskRequestToTaskEntity() {
-        UpdateTaskRequest request =
-                new UpdateTaskRequest(
-                        "Updated Task",
-                        "Updated Description",
-                        LocalDateTime.of(2025, 2, 2, 11, 0),
-                        TaskPriority.MEDIUM,
-                        TaskStatus.OPEN);
+        UpdateTaskRequest request = new UpdateTaskRequest(
+                "Updated Task",
+                "Updated Description",
+                LocalDateTime.of(2025, 2, 2, 11, 0),
+                TaskPriority.MEDIUM,
+                TaskStatus.OPEN);
 
         Task task = taskMapper.fromUpdateRequest(request);
 
