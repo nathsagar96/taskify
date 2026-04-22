@@ -9,10 +9,12 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 
+@DisplayName("TaskListRepository - Database Operations Tests")
 class TaskListRepositoryTest extends BaseDataJpaTest {
 
     @Autowired
@@ -38,48 +40,56 @@ class TaskListRepositoryTest extends BaseDataJpaTest {
         taskList2 = entityManager.persistAndFlush(taskList2);
     }
 
-    @Test
-    @DisplayName("Should find all task lists")
-    void shouldFindAllTaskLists() {
-        List<TaskList> taskLists = taskListRepository.findAll();
-        assertNotNull(taskLists);
-        assertEquals(2, taskLists.size());
-        assertTrue(taskLists.stream().anyMatch(tl -> tl.getTitle().equals("Personal Tasks")));
-        assertTrue(taskLists.stream().anyMatch(tl -> tl.getTitle().equals("Shopping List")));
+    @Nested
+    @DisplayName("Find Operations")
+    class FindOperations {
+        @Test
+        @DisplayName("Should find all task lists")
+        void shouldFindAllTaskLists() {
+            List<TaskList> taskLists = taskListRepository.findAll();
+            assertNotNull(taskLists);
+            assertEquals(2, taskLists.size());
+            assertTrue(taskLists.stream().anyMatch(tl -> tl.getTitle().equals("Personal Tasks")));
+            assertTrue(taskLists.stream().anyMatch(tl -> tl.getTitle().equals("Shopping List")));
+        }
+
+        @Test
+        @DisplayName("Should find a task list by ID")
+        void shouldFindTaskListById() {
+            Optional<TaskList> foundTaskList = taskListRepository.findById(taskList1.getId());
+            assertTrue(foundTaskList.isPresent());
+            assertEquals(taskList1.getTitle(), foundTaskList.get().getTitle());
+        }
+
+        @Test
+        @DisplayName("Should return empty optional if task list not found by ID")
+        void shouldReturnEmptyOptionalIfTaskListNotFoundById() {
+            Optional<TaskList> foundTaskList = taskListRepository.findById(UUID.randomUUID());
+            assertTrue(foundTaskList.isEmpty());
+        }
     }
 
-    @Test
-    @DisplayName("Should find a task list by ID")
-    void shouldFindTaskListById() {
-        Optional<TaskList> foundTaskList = taskListRepository.findById(taskList1.getId());
-        assertTrue(foundTaskList.isPresent());
-        assertEquals(taskList1.getTitle(), foundTaskList.get().getTitle());
-    }
+    @Nested
+    @DisplayName("Delete Operations")
+    class DeleteOperations {
+        @Test
+        @DisplayName("Should delete a task list by ID")
+        void shouldDeleteTaskListById() {
+            taskListRepository.deleteById(taskList1.getId());
+            Optional<TaskList> deletedTaskList = taskListRepository.findById(taskList1.getId());
+            assertTrue(deletedTaskList.isEmpty());
 
-    @Test
-    @DisplayName("Should return empty optional if task list not found by ID")
-    void shouldReturnEmptyOptionalIfTaskListNotFoundById() {
-        Optional<TaskList> foundTaskList = taskListRepository.findById(UUID.randomUUID());
-        assertTrue(foundTaskList.isEmpty());
-    }
+            List<TaskList> remainingTaskLists = taskListRepository.findAll();
+            assertEquals(1, remainingTaskLists.size());
+            assertTrue(remainingTaskLists.stream().anyMatch(tl -> tl.getTitle().equals("Shopping List")));
+        }
 
-    @Test
-    @DisplayName("Should delete a task list by ID")
-    void shouldDeleteTaskListById() {
-        taskListRepository.deleteById(taskList1.getId());
-        Optional<TaskList> deletedTaskList = taskListRepository.findById(taskList1.getId());
-        assertTrue(deletedTaskList.isEmpty());
-
-        List<TaskList> remainingTaskLists = taskListRepository.findAll();
-        assertEquals(1, remainingTaskLists.size());
-        assertTrue(remainingTaskLists.stream().anyMatch(tl -> tl.getTitle().equals("Shopping List")));
-    }
-
-    @Test
-    @DisplayName("Should not delete other task lists when deleting by ID")
-    void shouldNotDeleteOtherTaskListsWhenDeletingById() {
-        taskListRepository.deleteById(taskList1.getId());
-        Optional<TaskList> taskList2AfterDelete = taskListRepository.findById(taskList2.getId());
-        assertTrue(taskList2AfterDelete.isPresent());
+        @Test
+        @DisplayName("Should not delete other task lists when deleting by ID")
+        void shouldNotDeleteOtherTaskListsWhenDeletingById() {
+            taskListRepository.deleteById(taskList1.getId());
+            Optional<TaskList> taskList2AfterDelete = taskListRepository.findById(taskList2.getId());
+            assertTrue(taskList2AfterDelete.isPresent());
+        }
     }
 }

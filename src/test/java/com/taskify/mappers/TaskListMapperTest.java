@@ -8,56 +8,71 @@ import com.taskify.dtos.UpdateTaskListRequest;
 import com.taskify.entities.TaskList;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("TaskListMapper - Mapping Tests")
 class TaskListMapperTest {
 
     @InjectMocks
     private TaskListMapper taskListMapper;
 
-    @Test
-    @DisplayName("Should map TaskList entity to TaskListDto")
-    void shouldMapTaskListEntityToTaskListDto() {
-        UUID taskListId = UUID.randomUUID();
-        TaskList taskList = new TaskList();
-        taskList.setId(taskListId);
-        taskList.setTitle("Test Task List");
+    @Nested
+    @DisplayName("TaskList Entity to DTO Mapping")
+    class TaskListEntityToDtoMapping {
+        @Test
+        @DisplayName("Should map TaskList entity to TaskListDto")
+        void shouldMapTaskListEntityToTaskListDto() {
+            UUID taskListId = UUID.randomUUID();
+            TaskList taskList = new TaskList();
+            taskList.setId(taskListId);
+            taskList.setTitle("Test Task List");
 
-        TaskListDto taskListDto = taskListMapper.toDto(taskList);
+            TaskListDto taskListDto = taskListMapper.toDto(taskList);
 
-        assertNotNull(taskListDto);
-        assertEquals(0, taskListDto.count());
-        assertEquals(0.0, taskListDto.progress());
-        assertEquals(taskList.getId(), taskListDto.id());
-        assertEquals(taskList.getTitle(), taskListDto.title());
+            assertNotNull(taskListDto);
+            assertEquals(0, taskListDto.count());
+            assertEquals(0.0, taskListDto.progress());
+            assertEquals(taskList.getId(), taskListDto.id());
+            assertEquals(taskList.getTitle(), taskListDto.title());
+        }
     }
 
-    @Test
-    @DisplayName("Should map CreateTaskListRequest to TaskList entity")
-    void shouldMapCreateTaskListRequestToTaskListEntity() {
-        CreateTaskListRequest request = new CreateTaskListRequest("New Task List", "New Task List Description");
+    @Nested
+    @DisplayName("CreateTaskListRequest to TaskList Entity Mapping")
+    class CreateTaskListRequestToTaskListEntityMapping {
+        @Test
+        @DisplayName("Should map CreateTaskListRequest to TaskList entity")
+        void shouldMapCreateTaskListRequestToTaskListEntity() {
+            CreateTaskListRequest request = new CreateTaskListRequest("New Task List", "New Task List Description");
 
-        TaskList taskList = taskListMapper.fromCreateRequest(request);
+            TaskList taskList = taskListMapper.fromCreateRequest(request);
 
-        assertNotNull(taskList);
-        assertEquals(request.title(), taskList.getTitle());
-        assertNull(taskList.getId()); // ID should be null for new entity
+            assertNotNull(taskList);
+            assertEquals(request.title(), taskList.getTitle());
+            assertNull(taskList.getId()); // ID should be null for new entity
+        }
     }
 
-    @Test
-    @DisplayName("Should map UpdateTaskListRequest to TaskList entity")
-    void shouldMapUpdateTaskListRequestToTaskListEntity() {
-        UpdateTaskListRequest request = new UpdateTaskListRequest("Updated Task List", "Updated Task List Description");
+    @Nested
+    @DisplayName("UpdateTaskListRequest to TaskList Entity Mapping")
+    class UpdateTaskListRequestToTaskListEntityMapping {
+        @Test
+        @DisplayName("Should map UpdateTaskListRequest to TaskList entity")
+        void shouldMapUpdateTaskListRequestToTaskListEntity() {
+            UpdateTaskListRequest request =
+                    new UpdateTaskListRequest("Updated Task List", "Updated Task List Description");
 
-        TaskList taskList = taskListMapper.fromUpdateRequest(request);
+            TaskList taskList = taskListMapper.fromUpdateRequest(request);
 
-        assertNotNull(taskList);
-        assertEquals(request.title(), taskList.getTitle());
-        assertEquals(request.description(), taskList.getDescription());
-        assertNull(taskList.getId()); // ID should be null for mapping
+            assertNotNull(taskList);
+            assertEquals(request.title(), taskList.getTitle());
+            assertEquals(request.description(), taskList.getDescription());
+            assertNull(taskList.getId()); // ID should be null for mapping
+        }
     }
 }

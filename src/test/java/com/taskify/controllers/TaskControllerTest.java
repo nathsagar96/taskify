@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.cache.test.autoconfigure.AutoConfigureCache;
@@ -37,6 +38,7 @@ import tools.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc
 @AutoConfigureCache
 @WebMvcTest(controllers = TaskController.class)
+@DisplayName("TaskController - API Tests")
 class TaskControllerTest {
 
     @Autowired
@@ -95,178 +97,201 @@ class TaskControllerTest {
                 task2.getStatus());
     }
 
-    @Test
-    @DisplayName("GET /api/v1/task-lists/{task_list_id}/tasks - Should list all tasks for a given task list")
-    void shouldListAllTasksForGivenTaskList() throws Exception {
-        // Arrange
-        when(taskService.listTasks(taskList.getId())).thenReturn(List.of(taskDto1, taskDto2));
+    @Nested
+    @DisplayName("GET /api/v1/task-lists/{task_list_id}/tasks")
+    class ListTasks {
+        @Test
+        @DisplayName("Should list all tasks for a given task list")
+        void shouldListAllTasksForGivenTaskList() throws Exception {
+            // Arrange
+            when(taskService.listTasks(taskList.getId())).thenReturn(List.of(taskDto1, taskDto2));
 
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/task-lists/{task_list_id}/tasks", taskList.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].title", is(taskDto1.title())))
-                .andExpect(jsonPath("$[1].title", is(taskDto2.title())));
+            // Act & Assert
+            mockMvc.perform(get("/api/v1/task-lists/{task_list_id}/tasks", taskList.getId()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(2)))
+                    .andExpect(jsonPath("$[0].title", is(taskDto1.title())))
+                    .andExpect(jsonPath("$[1].title", is(taskDto2.title())));
+        }
+
+        @Test
+        @DisplayName("Should return empty list if task list not found")
+        void shouldReturnEmptyListIfTaskListNotFoundWhenListingTasks() throws Exception {
+            // Arrange
+            UUID nonExistentTaskListId = UUID.randomUUID();
+            when(taskService.listTasks(nonExistentTaskListId)).thenReturn(List.of());
+
+            // Act & Assert
+            mockMvc.perform(get("/api/v1/task-lists/{task_list_id}/tasks", nonExistentTaskListId))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(0)));
+        }
     }
 
-    @Test
-    @DisplayName("GET /api/v1/task-lists/{task_list_id}/tasks - Should return empty list if task list not found")
-    void shouldReturnEmptyListIfTaskListNotFoundWhenListingTasks() throws Exception {
-        // Arrange
-        UUID nonExistentTaskListId = UUID.randomUUID();
-        when(taskService.listTasks(nonExistentTaskListId)).thenReturn(List.of());
+    @Nested
+    @DisplayName("POST /api/v1/task-lists/{task_list_id}/tasks")
+    class CreateTask {
+        @Test
+        @DisplayName("Should create a new task successfully")
+        void shouldCreateNewTaskSuccessfully() throws Exception {
+            // Arrange
+            CreateTaskRequest request = new CreateTaskRequest(
+                    "New Task", "Description for new task", LocalDateTime.now().plusDays(1), TaskPriority.LOW);
 
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/task-lists/{task_list_id}/tasks", nonExistentTaskListId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+            TaskDto newTaskDto = new TaskDto(
+                    UUID.randomUUID(),
+                    request.title(),
+                    request.description(),
+                    request.dueDate(),
+                    request.priority(),
+                    TaskStatus.OPEN);
+
+            when(taskService.createTask(eq(taskList.getId()), any(CreateTaskRequest.class)))
+                    .thenReturn(newTaskDto);
+
+            // Act & Assert
+            mockMvc.perform(post("/api/v1/task-lists/{task_list_id}/tasks", taskList.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.title", is(request.title())))
+                    .andExpect(jsonPath("$.status", is(TaskStatus.OPEN.name())));
+        }
+
+        @Test
+        @DisplayName("Should return 404 if task list not found when creating task")
+        void shouldReturn404IfTaskListNotFoundWhenCreatingTask() throws Exception {
+            // Arrange
+            CreateTaskRequest request = new CreateTaskRequest(
+                    "New Task", "Description for new task", LocalDateTime.now().plusDays(1), TaskPriority.LOW);
+
+            UUID nonExistentTaskListId = UUID.randomUUID();
+
+            when(taskService.createTask(eq(nonExistentTaskListId), any(CreateTaskRequest.class)))
+                    .thenThrow(new TaskListNotFoundException("Task List not found with ID: " + nonExistentTaskListId));
+
+            // Act & Assert
+            mockMvc.perform(post("/api/v1/task-lists/{task_list_id}/tasks", nonExistentTaskListId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.detail", is("Task List not found with ID: " + nonExistentTaskListId)));
+        }
     }
 
-    @Test
-    @DisplayName("POST /api/v1/task-lists/{task_list_id}/tasks - Should create a new task successfully")
-    void shouldCreateNewTaskSuccessfully() throws Exception {
-        // Arrange
-        CreateTaskRequest request = new CreateTaskRequest(
-                "New Task", "Description for new task", LocalDateTime.now().plusDays(1), TaskPriority.LOW);
+    @Nested
+    @DisplayName("GET /api/v1/task-lists/{task_list_id}/tasks/{task_id}")
+    class GetTask {
+        @Test
+        @DisplayName("Should get a task by ID")
+        void shouldGetTaskById() throws Exception {
+            // Arrange
+            when(taskService.getTask(taskList.getId(), task1.getId())).thenReturn(taskDto1);
 
-        TaskDto newTaskDto = new TaskDto(
-                UUID.randomUUID(),
-                request.title(),
-                request.description(),
-                request.dueDate(),
-                request.priority(),
-                TaskStatus.OPEN);
+            // Act & Assert
+            mockMvc.perform(get("/api/v1/task-lists/{task_list_id}/tasks/{task_id}", taskList.getId(), task1.getId()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.title", is(taskDto1.title())));
+        }
 
-        when(taskService.createTask(eq(taskList.getId()), any(CreateTaskRequest.class)))
-                .thenReturn(newTaskDto);
+        @Test
+        @DisplayName("Should return 404 if task not found")
+        void shouldReturn404IfTaskNotFound() throws Exception {
+            // Arrange
+            UUID taskId = UUID.randomUUID();
+            when(taskService.getTask(taskList.getId(), taskId))
+                    .thenThrow(new TaskNotFoundException(
+                            "Task List not found with ID: " + taskId + " in Task List: " + taskList.getId()));
 
-        // Act & Assert
-        mockMvc.perform(post("/api/v1/task-lists/{task_list_id}/tasks", taskList.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.title", is(request.title())))
-                .andExpect(jsonPath("$.status", is(TaskStatus.OPEN.name())));
+            // Act & Assert
+            mockMvc.perform(get("/api/v1/task-lists/{task_list_id}/tasks/{task_id}", taskList.getId(), taskId))
+                    .andExpect(status().isNotFound());
+        }
     }
 
-    @Test
-    @DisplayName(
-            "POST /api/v1/task-lists/{task_list_id}/tasks - Should return 404 if task list not found when creating task")
-    void shouldReturn404IfTaskListNotFoundWhenCreatingTask() throws Exception {
-        // Arrange
-        CreateTaskRequest request = new CreateTaskRequest(
-                "New Task", "Description for new task", LocalDateTime.now().plusDays(1), TaskPriority.LOW);
+    @Nested
+    @DisplayName("PUT /api/v1/task-lists/{task_list_id}/tasks/{task_id}")
+    class UpdateTask {
+        @Test
+        @DisplayName("Should update an existing task successfully")
+        void shouldUpdateExistingTaskSuccessfully() throws Exception {
+            // Arrange
+            UpdateTaskRequest request = new UpdateTaskRequest(
+                    "Updated Title",
+                    "Updated Description",
+                    LocalDateTime.now().plusDays(15),
+                    TaskPriority.HIGH,
+                    TaskStatus.CLOSED);
 
-        UUID nonExistentTaskListId = UUID.randomUUID();
+            TaskDto updatedTaskDto = new TaskDto(
+                    task1.getId(),
+                    request.title(),
+                    request.description(),
+                    request.dueDate(),
+                    request.priority(),
+                    request.status());
 
-        when(taskService.createTask(eq(nonExistentTaskListId), any(CreateTaskRequest.class)))
-                .thenThrow(new TaskListNotFoundException("Task List not found with ID: " + nonExistentTaskListId));
+            when(taskService.updateTask(eq(taskList.getId()), eq(task1.getId()), any(UpdateTaskRequest.class)))
+                    .thenReturn(updatedTaskDto);
 
-        // Act & Assert
-        mockMvc.perform(post("/api/v1/task-lists/{task_list_id}/tasks", nonExistentTaskListId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.detail", is("Task List not found with ID: " + nonExistentTaskListId)));
+            // Act & Assert
+            mockMvc.perform(put("/api/v1/task-lists/{task_list_id}/tasks/{task_id}", taskList.getId(), task1.getId())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.title", is(updatedTaskDto.title())))
+                    .andExpect(jsonPath("$.description", is(updatedTaskDto.description())))
+                    .andExpect(
+                            jsonPath("$.priority", is(updatedTaskDto.priority().name())))
+                    .andExpect(jsonPath("$.status", is(updatedTaskDto.status().name())));
+        }
+
+        @Test
+        @DisplayName("Should return 404 if task not found when updating")
+        void shouldReturn404IfTaskNotFoundWhenUpdating() throws Exception {
+            // Arrange
+            UpdateTaskRequest request = new UpdateTaskRequest(
+                    "Updated Title",
+                    "Updated Description",
+                    LocalDateTime.now().plusDays(15),
+                    TaskPriority.HIGH,
+                    TaskStatus.CLOSED);
+
+            UUID nonExistentTaskId = UUID.randomUUID();
+
+            when(taskService.updateTask(eq(taskList.getId()), eq(nonExistentTaskId), any(UpdateTaskRequest.class)))
+                    .thenThrow(new TaskNotFoundException(
+                            "Task not found with ID: " + nonExistentTaskId + " in Task List: " + taskList.getId()));
+
+            // Act & Assert
+            mockMvc.perform(put(
+                                    "/api/v1/task-lists/{task_list_id}/tasks/{task_id}",
+                                    taskList.getId(),
+                                    nonExistentTaskId)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath(
+                            "$.detail",
+                            is("Task not found with ID: " + nonExistentTaskId + " in Task List: " + taskList.getId())));
+        }
     }
 
-    @Test
-    @DisplayName("GET /api/v1/task-lists/{task_list_id}/tasks/{task_id} - Should get a task by ID")
-    void shouldGetTaskById() throws Exception {
-        // Arrange
-        when(taskService.getTask(taskList.getId(), task1.getId())).thenReturn(taskDto1);
+    @Nested
+    @DisplayName("DELETE /api/v1/task-lists/{task_list_id}/tasks/{task_id}")
+    class DeleteTask {
+        @Test
+        @DisplayName("Should delete a task successfully")
+        void shouldDeleteTaskSuccessfully() throws Exception {
+            // Arrange
+            doNothing().when(taskService).deleteTask(taskList.getId(), task1.getId());
 
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/task-lists/{task_list_id}/tasks/{task_id}", taskList.getId(), task1.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title", is(taskDto1.title())));
-    }
+            // Act & Assert
+            mockMvc.perform(delete(
+                            "/api/v1/task-lists/{task_list_id}/tasks/{task_id}", taskList.getId(), task1.getId()))
+                    .andExpect(status().isNoContent());
 
-    @Test
-    @DisplayName("GET /api/v1/task-lists/{task_list_id}/tasks/{task_id} - Should return 404 if task not found")
-    void shouldReturn404IfTaskNotFound() throws Exception {
-        // Arrange
-        UUID taskId = UUID.randomUUID();
-        when(taskService.getTask(taskList.getId(), taskId))
-                .thenThrow(new TaskNotFoundException(
-                        "Task List not found with ID: " + taskId + " in Task List: " + taskList.getId()));
-
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/task-lists/{task_list_id}/tasks/{task_id}", taskList.getId(), taskId))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @DisplayName("PUT /api/v1/task-lists/{task_list_id}/tasks/{task_id} - Should update an existing task successfully")
-    void shouldUpdateExistingTaskSuccessfully() throws Exception {
-        // Arrange
-        UpdateTaskRequest request = new UpdateTaskRequest(
-                "Updated Title",
-                "Updated Description",
-                LocalDateTime.now().plusDays(15),
-                TaskPriority.HIGH,
-                TaskStatus.CLOSED);
-
-        TaskDto updatedTaskDto = new TaskDto(
-                task1.getId(),
-                request.title(),
-                request.description(),
-                request.dueDate(),
-                request.priority(),
-                request.status());
-
-        when(taskService.updateTask(eq(taskList.getId()), eq(task1.getId()), any(UpdateTaskRequest.class)))
-                .thenReturn(updatedTaskDto);
-
-        // Act & Assert
-        mockMvc.perform(put("/api/v1/task-lists/{task_list_id}/tasks/{task_id}", taskList.getId(), task1.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title", is(updatedTaskDto.title())))
-                .andExpect(jsonPath("$.description", is(updatedTaskDto.description())))
-                .andExpect(jsonPath("$.priority", is(updatedTaskDto.priority().name())))
-                .andExpect(jsonPath("$.status", is(updatedTaskDto.status().name())));
-    }
-
-    @Test
-    @DisplayName(
-            "PUT /api/v1/task-lists/{task_list_id}/tasks/{task_id} - Should return 404 if task not found when updating")
-    void shouldReturn404IfTaskNotFoundWhenUpdating() throws Exception {
-        // Arrange
-        UpdateTaskRequest request = new UpdateTaskRequest(
-                "Updated Title",
-                "Updated Description",
-                LocalDateTime.now().plusDays(15),
-                TaskPriority.HIGH,
-                TaskStatus.CLOSED);
-
-        UUID nonExistentTaskId = UUID.randomUUID();
-
-        when(taskService.updateTask(eq(taskList.getId()), eq(nonExistentTaskId), any(UpdateTaskRequest.class)))
-                .thenThrow(new TaskNotFoundException(
-                        "Task not found with ID: " + nonExistentTaskId + " in Task List: " + taskList.getId()));
-
-        // Act & Assert
-        mockMvc.perform(put("/api/v1/task-lists/{task_list_id}/tasks/{task_id}", taskList.getId(), nonExistentTaskId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath(
-                        "$.detail",
-                        is("Task not found with ID: " + nonExistentTaskId + " in Task List: " + taskList.getId())));
-    }
-
-    @Test
-    @DisplayName("DELETE /api/v1/task-lists/{task_list_id}/tasks/{task_id} - Should delete a task successfully")
-    void shouldDeleteTaskSuccessfully() throws Exception {
-        // Arrange
-        doNothing().when(taskService).deleteTask(taskList.getId(), task1.getId());
-
-        // Act & Assert
-        mockMvc.perform(delete("/api/v1/task-lists/{task_list_id}/tasks/{task_id}", taskList.getId(), task1.getId()))
-                .andExpect(status().isNoContent());
-
-        verify(taskService, times(1)).deleteTask(taskList.getId(), task1.getId());
+            verify(taskService, times(1)).deleteTask(taskList.getId(), task1.getId());
+        }
     }
 }
