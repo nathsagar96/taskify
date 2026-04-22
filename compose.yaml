@@ -16,10 +16,10 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - taskify-network
+      - taskify
 
 networks:
-  taskify-network:
+  taskify:
     driver: bridge
 
 volumes:
