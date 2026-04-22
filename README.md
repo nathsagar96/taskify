@@ -50,8 +50,7 @@ cd taskify
 
 2. Start the PostgreSQL service using Docker Compose
 
-> The repository includes `compose.yaml` (or `docker-compose.yml`) to start a PostgreSQL container. Adjust env vars if
-> needed.
+> The repository includes `compose.yaml` to start a PostgreSQL container. Adjust env vars if needed.
 
 ```bash
 # run from project root (macOS / zsh)
@@ -148,7 +147,7 @@ your environment. Example build:
 
 ```bash
 ./mvnw -DskipTests package
-# build a Docker image (if Dockerfile exists)
+# build a Docker image
 docker build -t taskify:latest .
 ```
 
