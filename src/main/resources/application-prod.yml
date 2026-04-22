@@ -1,8 +1,4 @@
 spring:
-  datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
     hikari:
       maximum-pool-size: 50
       max-lifetime: 1800000

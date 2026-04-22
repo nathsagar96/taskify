@@ -89,19 +89,19 @@ Base path: `/api/v1`
 
 Task Lists
 
-- GET /api/v1/tasklists — list all task lists
-- GET /api/v1/tasklists/{task_list_id} — get a task list
-- POST /api/v1/tasklists — create a task list
-- PUT /api/v1/tasklists/{task_list_id} — update a task list
-- DELETE /api/v1/tasklists/{task_list_id} — delete a task list
+- GET /api/v1/task-lists — list all task lists
+- GET /api/v1/task-lists/{task_list_id} — get a task list
+- POST /api/v1/task-lists — create a task list
+- PUT /api/v1/task-lists/{task_list_id} — update a task list
+- DELETE /api/v1/task-lists/{task_list_id} — delete a task list
 
 Tasks
 
-- GET /api/v1/tasklists/{task_list_id}/tasks — list tasks in a task list
-- GET /api/v1/tasklists/{task_list_id}/tasks/{task_id} — get a task
-- POST /api/v1/tasklists/{task_list_id}/tasks — create a task
-- PUT /api/v1/tasklists/{task_list_id}/tasks/{task_id} — update a task
-- DELETE /api/v1/tasklists/{task_list_id}/tasks/{task_id} — delete a task
+- GET /api/v1/task-lists/{task_list_id}/tasks — list tasks in a task list
+- GET /api/v1/task-lists/{task_list_id}/tasks/{task_id} — get a task
+- POST /api/v1/task-lists/{task_list_id}/tasks — create a task
+- PUT /api/v1/task-lists/{task_list_id}/tasks/{task_id} — update a task
+- DELETE /api/v1/task-lists/{task_list_id}/tasks/{task_id} — delete a task
 
 (The full API and DTOs are defined in the source `controllers` and `dtos` packages.)
 
