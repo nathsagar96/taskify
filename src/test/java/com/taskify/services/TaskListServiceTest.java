@@ -1,5 +1,8 @@
 package com.taskify.services;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 import com.taskify.dtos.CreateTaskListRequest;
 import com.taskify.dtos.TaskListDto;
 import com.taskify.dtos.UpdateTaskListRequest;
@@ -8,6 +11,10 @@ import com.taskify.exceptions.TaskListNotFoundException;
 import com.taskify.mappers.TaskListMapper;
 import com.taskify.repositories.TaskListRepository;
 import com.taskify.repositories.TaskRepository;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,21 +23,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class TaskListServiceTest {
 
     @Mock
     private TaskListRepository taskListRepository;
+
     @Mock
     private TaskListMapper taskListMapper;
+
     @Mock
     private TaskRepository taskRepository;
 
@@ -48,9 +49,7 @@ class TaskListServiceTest {
         taskList.setId(taskListId);
         taskList.setTitle("Test Task List");
 
-        taskListDto =
-                new TaskListDto(
-                        taskListId, taskList.getTitle(), taskList.getDescription(), 0, 0.0, List.of());
+        taskListDto = new TaskListDto(taskListId, taskList.getTitle(), taskList.getDescription(), 0, 0.0, List.of());
     }
 
     @Test
@@ -121,8 +120,7 @@ class TaskListServiceTest {
     @Test
     @DisplayName("Should update a task list successfully")
     void shouldUpdateTaskListSuccessfully() {
-        UpdateTaskListRequest request =
-                new UpdateTaskListRequest("Updated Task List Name", "Updated Description");
+        UpdateTaskListRequest request = new UpdateTaskListRequest("Updated Task List Name", "Updated Description");
         TaskListDto updatedTaskListDto =
                 new TaskListDto(taskListId, request.title(), request.description(), 0, 0.0, List.of());
 
@@ -142,12 +140,10 @@ class TaskListServiceTest {
     @Test
     @DisplayName("Should throw TaskListNotFoundException when updating non-existent task list")
     void shouldThrowTaskListNotFoundExceptionWhenUpdatingNonExistentTaskList() {
-        UpdateTaskListRequest request =
-                new UpdateTaskListRequest("Updated Task List Name", "Updated Description");
+        UpdateTaskListRequest request = new UpdateTaskListRequest("Updated Task List Name", "Updated Description");
         when(taskListRepository.findById(taskListId)).thenReturn(Optional.empty());
 
-        assertThrows(
-                TaskListNotFoundException.class, () -> taskListService.updateTaskList(taskListId, request));
+        assertThrows(TaskListNotFoundException.class, () -> taskListService.updateTaskList(taskListId, request));
         verify(taskListRepository, times(1)).findById(taskListId);
         verify(taskListRepository, never()).save(any(TaskList.class));
     }

@@ -1,12 +1,11 @@
 package com.taskify.entities;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "task_lists")
@@ -34,16 +33,10 @@ public class TaskList {
             cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     private List<Task> tasks;
 
-    public TaskList() {
-    }
+    public TaskList() {}
 
     public TaskList(
-            UUID id,
-            String title,
-            String description,
-            LocalDateTime created,
-            LocalDateTime updated,
-            List<Task> tasks) {
+            UUID id, String title, String description, LocalDateTime created, LocalDateTime updated, List<Task> tasks) {
         this.id = id;
         this.title = title;
         this.description = description;

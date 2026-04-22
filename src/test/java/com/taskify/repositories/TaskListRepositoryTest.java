@@ -1,25 +1,26 @@
 package com.taskify.repositories;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.taskify.BaseDataJpaTest;
 import com.taskify.entities.TaskList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 
 class TaskListRepositoryTest extends BaseDataJpaTest {
 
     @Autowired
     private TaskListRepository taskListRepository;
+
     @Autowired
     private TestEntityManager entityManager;
+
     private TaskList taskList1;
     private TaskList taskList2;
 

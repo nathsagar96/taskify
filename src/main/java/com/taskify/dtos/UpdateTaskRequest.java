@@ -4,7 +4,6 @@ import com.taskify.entities.TaskPriority;
 import com.taskify.entities.TaskStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
 import java.time.LocalDateTime;
 
 public record UpdateTaskRequest(
@@ -12,5 +11,4 @@ public record UpdateTaskRequest(
         String description,
         LocalDateTime dueDate,
         TaskPriority priority,
-        TaskStatus status) {
-}
+        TaskStatus status) {}

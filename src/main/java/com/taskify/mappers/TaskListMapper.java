@@ -5,9 +5,8 @@ import com.taskify.dtos.TaskListDto;
 import com.taskify.dtos.UpdateTaskListRequest;
 import com.taskify.entities.TaskList;
 import com.taskify.entities.TaskStatus;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 @Component
 public class TaskListMapper {
@@ -47,16 +46,16 @@ public class TaskListMapper {
         }
 
         if (taskList.getTasks() == null) {
-            return new TaskListDto(
-                    taskList.getId(), taskList.getTitle(), taskList.getDescription(), 0, 0.0, List.of());
+            return new TaskListDto(taskList.getId(), taskList.getTitle(), taskList.getDescription(), 0, 0.0, List.of());
         }
 
         int count = taskList.getTasks().size();
 
-        double progress =
-                taskList.getTasks().stream().filter(task -> task.getStatus() == TaskStatus.CLOSED).count()
-                        * 100.0
-                        / Math.max(count, 1);
+        double progress = taskList.getTasks().stream()
+                        .filter(task -> task.getStatus() == TaskStatus.CLOSED)
+                        .count()
+                * 100.0
+                / Math.max(count, 1);
 
         return new TaskListDto(
                 taskList.getId(),

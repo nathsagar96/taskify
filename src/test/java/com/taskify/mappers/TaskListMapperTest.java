@@ -1,18 +1,17 @@
 package com.taskify.mappers;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.taskify.dtos.CreateTaskListRequest;
 import com.taskify.dtos.TaskListDto;
 import com.taskify.dtos.UpdateTaskListRequest;
 import com.taskify.entities.TaskList;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class TaskListMapperTest {
@@ -40,8 +39,7 @@ class TaskListMapperTest {
     @Test
     @DisplayName("Should map CreateTaskListRequest to TaskList entity")
     void shouldMapCreateTaskListRequestToTaskListEntity() {
-        CreateTaskListRequest request =
-                new CreateTaskListRequest("New Task List", "New Task List Description");
+        CreateTaskListRequest request = new CreateTaskListRequest("New Task List", "New Task List Description");
 
         TaskList taskList = taskListMapper.fromCreateRequest(request);
 
@@ -53,8 +51,7 @@ class TaskListMapperTest {
     @Test
     @DisplayName("Should map UpdateTaskListRequest to TaskList entity")
     void shouldMapUpdateTaskListRequestToTaskListEntity() {
-        UpdateTaskListRequest request =
-                new UpdateTaskListRequest("Updated Task List", "Updated Task List Description");
+        UpdateTaskListRequest request = new UpdateTaskListRequest("Updated Task List", "Updated Task List Description");
 
         TaskList taskList = taskListMapper.fromUpdateRequest(request);
 

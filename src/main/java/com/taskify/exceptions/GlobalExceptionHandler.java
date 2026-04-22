@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(TaskListNotFoundException.class)
-    public ResponseEntity<ProblemDetail> handleTaskListNotFoundException(
-            TaskListNotFoundException ex) {
+    public ResponseEntity<ProblemDetail> handleTaskListNotFoundException(TaskListNotFoundException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
         problemDetail.setTitle("Task list not found");
         problemDetail.setDetail(ex.getMessage());
