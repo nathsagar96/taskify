@@ -33,11 +33,11 @@ class TaskMapperTest {
         void shouldMapTaskEntityToTaskDto() {
             UUID taskId = UUID.randomUUID();
             UUID taskListId = UUID.randomUUID();
-            TaskList taskList = new TaskList();
+            var taskList = new TaskList();
             taskList.setId(taskListId);
             taskList.setTitle("Test Task List");
 
-            Task task = new Task();
+            var task = new Task();
             task.setId(taskId);
             task.setTitle("Test Task");
             task.setDescription("Description");
@@ -66,7 +66,7 @@ class TaskMapperTest {
         @Test
         @DisplayName("Should map CreateTaskRequest to Task entity")
         void shouldMapCreateTaskRequestToTaskEntity() {
-            CreateTaskRequest request = new CreateTaskRequest(
+            var request = new CreateTaskRequest(
                     "New Task", "New Description", LocalDateTime.of(2025, 1, 1, 10, 0), TaskPriority.LOW);
 
             Task task = taskMapper.fromCreateRequest(request);
@@ -88,7 +88,7 @@ class TaskMapperTest {
         @Test
         @DisplayName("Should map UpdateTaskRequest to Task entity")
         void shouldMapUpdateTaskRequestToTaskEntity() {
-            UpdateTaskRequest request = new UpdateTaskRequest(
+            var request = new UpdateTaskRequest(
                     "Updated Task",
                     "Updated Description",
                     LocalDateTime.of(2025, 2, 2, 11, 0),

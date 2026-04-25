@@ -71,7 +71,7 @@ class TaskControllerTest {
         task1.setStatus(TaskStatus.OPEN);
         task1.setTaskList(taskList);
 
-        Task task2 = new Task();
+        var task2 = new Task();
         task2.setId(UUID.randomUUID());
         task2.setTitle("Schedule Team Meeting");
         task2.setDescription("Arrange a meeting with the team to discuss progress.");
@@ -135,10 +135,10 @@ class TaskControllerTest {
         @DisplayName("Should create a new task successfully")
         void shouldCreateNewTaskSuccessfully() throws Exception {
             // Arrange
-            CreateTaskRequest request = new CreateTaskRequest(
+            var request = new CreateTaskRequest(
                     "New Task", "Description for new task", LocalDateTime.now().plusDays(1), TaskPriority.LOW);
 
-            TaskDto newTaskDto = new TaskDto(
+            var newTaskDto = new TaskDto(
                     UUID.randomUUID(),
                     request.title(),
                     request.description(),
@@ -162,7 +162,7 @@ class TaskControllerTest {
         @DisplayName("Should return 404 if task list not found when creating task")
         void shouldReturn404IfTaskListNotFoundWhenCreatingTask() throws Exception {
             // Arrange
-            CreateTaskRequest request = new CreateTaskRequest(
+            var request = new CreateTaskRequest(
                     "New Task", "Description for new task", LocalDateTime.now().plusDays(1), TaskPriority.LOW);
 
             UUID nonExistentTaskListId = UUID.randomUUID();
@@ -216,14 +216,14 @@ class TaskControllerTest {
         @DisplayName("Should update an existing task successfully")
         void shouldUpdateExistingTaskSuccessfully() throws Exception {
             // Arrange
-            UpdateTaskRequest request = new UpdateTaskRequest(
+            var request = new UpdateTaskRequest(
                     "Updated Title",
                     "Updated Description",
                     LocalDateTime.now().plusDays(15),
                     TaskPriority.HIGH,
                     TaskStatus.CLOSED);
 
-            TaskDto updatedTaskDto = new TaskDto(
+            var updatedTaskDto = new TaskDto(
                     task1.getId(),
                     request.title(),
                     request.description(),
@@ -250,7 +250,7 @@ class TaskControllerTest {
         @DisplayName("Should return 404 if task not found when updating")
         void shouldReturn404IfTaskNotFoundWhenUpdating() throws Exception {
             // Arrange
-            UpdateTaskRequest request = new UpdateTaskRequest(
+            var request = new UpdateTaskRequest(
                     "Updated Title",
                     "Updated Description",
                     LocalDateTime.now().plusDays(15),

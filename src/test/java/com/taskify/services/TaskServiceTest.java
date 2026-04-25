@@ -16,7 +16,6 @@ import com.taskify.mappers.TaskMapper;
 import com.taskify.repositories.TaskListRepository;
 import com.taskify.repositories.TaskRepository;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -83,7 +82,7 @@ class TaskServiceTest {
         @Test
         @DisplayName("Should create a task successfully")
         void shouldCreateTaskSuccessfully() {
-            CreateTaskRequest request = new CreateTaskRequest(
+            var request = new CreateTaskRequest(
                     "New Task", "Description for new task", LocalDateTime.now().plusDays(1), TaskPriority.LOW);
 
             when(taskListRepository.findById(taskListId)).thenReturn(Optional.of(taskList));
@@ -105,7 +104,7 @@ class TaskServiceTest {
         @Test
         @DisplayName("Should throw TaskListNotFoundException when creating task for non-existent task list")
         void shouldThrowTaskListNotFoundExceptionWhenCreatingTaskForNonExistentTaskList() {
-            CreateTaskRequest request = new CreateTaskRequest(
+            var request = new CreateTaskRequest(
                     "New Task", "Description for new task", LocalDateTime.now().plusDays(1), TaskPriority.LOW);
 
             when(taskListRepository.findById(taskListId)).thenReturn(Optional.empty());
@@ -125,7 +124,7 @@ class TaskServiceTest {
             when(taskRepository.findByTaskListId(taskListId)).thenReturn(List.of(task));
             when(taskMapper.toDto(task)).thenReturn(taskDto);
 
-            List<TaskDto> tasks = taskService.listTasks(taskListId);
+            var tasks = taskService.listTasks(taskListId);
 
             assertNotNull(tasks);
             assertFalse(tasks.isEmpty());
@@ -138,9 +137,9 @@ class TaskServiceTest {
         @Test
         @DisplayName("Should return empty list when no tasks found for a given task list")
         void shouldReturnEmptyListWhenNoTasksFoundForGivenTaskList() {
-            when(taskRepository.findByTaskListId(taskListId)).thenReturn(Collections.emptyList());
+            when(taskRepository.findByTaskListId(taskListId)).thenReturn(List.of());
 
-            List<TaskDto> tasks = taskService.listTasks(taskListId);
+            var tasks = taskService.listTasks(taskListId);
 
             assertNotNull(tasks);
             assertTrue(tasks.isEmpty());
@@ -183,14 +182,14 @@ class TaskServiceTest {
         @Test
         @DisplayName("Should update a task successfully")
         void shouldUpdateTaskSuccessfully() {
-            UpdateTaskRequest request = new UpdateTaskRequest(
+            var request = new UpdateTaskRequest(
                     "Updated Task Title",
                     "Updated Description",
                     LocalDateTime.now().plusDays(10),
                     TaskPriority.HIGH,
                     TaskStatus.CLOSED);
 
-            Task updatedTask = new Task();
+            var updatedTask = new Task();
             updatedTask.setId(taskId);
             updatedTask.setTitle(request.title());
             updatedTask.setDescription(request.description());
@@ -199,7 +198,7 @@ class TaskServiceTest {
             updatedTask.setStatus(request.status());
             updatedTask.setTaskList(taskList);
 
-            TaskDto updatedTaskDto = new TaskDto(
+            var updatedTaskDto = new TaskDto(
                     updatedTask.getId(),
                     updatedTask.getTitle(),
                     updatedTask.getDescription(),
@@ -229,7 +228,7 @@ class TaskServiceTest {
         @Test
         @DisplayName("Should throw TaskNotFoundException when updating non-existent task")
         void shouldThrowTaskNotFoundExceptionWhenUpdatingNonExistentTask() {
-            UpdateTaskRequest request = new UpdateTaskRequest(
+            var request = new UpdateTaskRequest(
                     "Updated Task Title",
                     "Updated Description",
                     LocalDateTime.now().plusDays(10),
@@ -264,9 +263,9 @@ class TaskServiceTest {
         @Test
         @DisplayName("Should update task with partial fields successfully")
         void shouldUpdateTaskWithPartialFieldsSuccessfully() {
-            UpdateTaskRequest request = new UpdateTaskRequest("Updated Task Title", null, null, null, null);
+            var request = new UpdateTaskRequest("Updated Task Title", null, null, null, null);
 
-            Task updatedTask = new Task();
+            var updatedTask = new Task();
             updatedTask.setId(taskId);
             updatedTask.setTitle(request.title());
             updatedTask.setDescription(task.getDescription());
@@ -275,7 +274,7 @@ class TaskServiceTest {
             updatedTask.setStatus(task.getStatus());
             updatedTask.setTaskList(taskList);
 
-            TaskDto updatedTaskDto = new TaskDto(
+            var updatedTaskDto = new TaskDto(
                     updatedTask.getId(),
                     updatedTask.getTitle(),
                     updatedTask.getDescription(),
@@ -305,10 +304,9 @@ class TaskServiceTest {
         @Test
         @DisplayName("Should update task due date successfully through updateTask")
         void shouldUpdateTaskDueDateSuccessfullyThroughUpdateTask() {
-            UpdateTaskRequest request =
-                    new UpdateTaskRequest(null, null, LocalDateTime.now().plusDays(5), null, null);
+            var request = new UpdateTaskRequest(null, null, LocalDateTime.now().plusDays(5), null, null);
 
-            Task updatedTask = new Task();
+            var updatedTask = new Task();
             updatedTask.setId(taskId);
             updatedTask.setTitle(task.getTitle());
             updatedTask.setDescription(task.getDescription());
@@ -317,7 +315,7 @@ class TaskServiceTest {
             updatedTask.setStatus(task.getStatus());
             updatedTask.setTaskList(taskList);
 
-            TaskDto updatedTaskDto = new TaskDto(
+            var updatedTaskDto = new TaskDto(
                     updatedTask.getId(),
                     updatedTask.getTitle(),
                     updatedTask.getDescription(),
@@ -343,9 +341,9 @@ class TaskServiceTest {
         @Test
         @DisplayName("Should update task priority successfully through updateTask")
         void shouldUpdateTaskPrioritySuccessfullyThroughUpdateTask() {
-            UpdateTaskRequest request = new UpdateTaskRequest(null, null, null, TaskPriority.HIGH, null);
+            var request = new UpdateTaskRequest(null, null, null, TaskPriority.HIGH, null);
 
-            Task updatedTask = new Task();
+            var updatedTask = new Task();
             updatedTask.setId(taskId);
             updatedTask.setTitle(task.getTitle());
             updatedTask.setDescription(task.getDescription());
@@ -354,7 +352,7 @@ class TaskServiceTest {
             updatedTask.setStatus(task.getStatus());
             updatedTask.setTaskList(taskList);
 
-            TaskDto updatedTaskDto = new TaskDto(
+            var updatedTaskDto = new TaskDto(
                     updatedTask.getId(),
                     updatedTask.getTitle(),
                     updatedTask.getDescription(),
@@ -380,10 +378,9 @@ class TaskServiceTest {
         @Test
         @DisplayName("Should throw IllegalArgumentException when updating due date with past date through updateTask")
         void shouldThrowIllegalArgumentExceptionWhenUpdatingDueDateWithPastDateThroughUpdateTask() {
-            UpdateTaskRequest request =
-                    new UpdateTaskRequest(null, null, LocalDateTime.now().minusDays(1), null, null);
+            var request = new UpdateTaskRequest(null, null, LocalDateTime.now().minusDays(1), null, null);
 
-            Task updatedTask = new Task();
+            var updatedTask = new Task();
             updatedTask.setDueDate(request.dueDate());
 
             when(taskRepository.findByTaskListIdAndId(taskListId, taskId)).thenReturn(Optional.of(task));

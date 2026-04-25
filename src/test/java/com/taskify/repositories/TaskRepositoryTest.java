@@ -8,8 +8,6 @@ import com.taskify.entities.TaskList;
 import com.taskify.entities.TaskPriority;
 import com.taskify.entities.TaskStatus;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -65,7 +63,7 @@ class TaskRepositoryTest extends BaseDataJpaTest {
         @Test
         @DisplayName("Should find tasks by task list ID")
         void shouldFindByTaskListId() {
-            List<Task> tasks = taskRepository.findByTaskListId(taskList.getId());
+            var tasks = taskRepository.findByTaskListId(taskList.getId());
             assertNotNull(tasks);
             assertEquals(2, tasks.size());
             assertTrue(tasks.stream().anyMatch(t -> t.getTitle().equals("Complete Project Proposal")));
@@ -75,7 +73,7 @@ class TaskRepositoryTest extends BaseDataJpaTest {
         @Test
         @DisplayName("Should find a task by task list ID and task ID")
         void shouldFindByTaskListIdAndId() {
-            Optional<Task> foundTask = taskRepository.findByTaskListIdAndId(taskList.getId(), task1.getId());
+            var foundTask = taskRepository.findByTaskListIdAndId(taskList.getId(), task1.getId());
             assertTrue(foundTask.isPresent());
             assertEquals(task1.getTitle(), foundTask.get().getTitle());
         }
@@ -83,7 +81,7 @@ class TaskRepositoryTest extends BaseDataJpaTest {
         @Test
         @DisplayName("Should return empty optional if task not found by task list ID and task ID")
         void shouldReturnEmptyOptionalIfTaskNotFoundByTaskListIdAndId() {
-            Optional<Task> foundTask = taskRepository.findByTaskListIdAndId(taskList.getId(), UUID.randomUUID());
+            var foundTask = taskRepository.findByTaskListIdAndId(taskList.getId(), UUID.randomUUID());
             assertTrue(foundTask.isEmpty());
         }
     }
@@ -95,10 +93,10 @@ class TaskRepositoryTest extends BaseDataJpaTest {
         @DisplayName("Should delete a task by task list ID and task ID")
         void shouldDeleteByTaskListIdAndId() {
             taskRepository.deleteByTaskListIdAndId(taskList.getId(), task1.getId());
-            Optional<Task> deletedTask = taskRepository.findById(task1.getId());
+            var deletedTask = taskRepository.findById(task1.getId());
             assertTrue(deletedTask.isEmpty());
 
-            List<Task> remainingTasks = taskRepository.findByTaskListId(taskList.getId());
+            var remainingTasks = taskRepository.findByTaskListId(taskList.getId());
             assertEquals(1, remainingTasks.size());
             assertTrue(remainingTasks.stream().anyMatch(t -> t.getTitle().equals("Schedule Team Meeting")));
         }
@@ -107,7 +105,7 @@ class TaskRepositoryTest extends BaseDataJpaTest {
         @DisplayName("Should not delete other tasks when deleting by task list ID and task ID")
         void shouldNotDeleteOtherTasksWhenDeletingByTaskListIdAndId() {
             taskRepository.deleteByTaskListIdAndId(taskList.getId(), task1.getId());
-            Optional<Task> task2AfterDelete = taskRepository.findById(task2.getId());
+            var task2AfterDelete = taskRepository.findById(task2.getId());
             assertTrue(task2AfterDelete.isPresent());
         }
     }

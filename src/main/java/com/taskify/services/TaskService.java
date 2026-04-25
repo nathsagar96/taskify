@@ -35,7 +35,7 @@ public class TaskService {
 
     @Cacheable(value = "tasks", key = "#taskListId")
     public List<TaskDto> listTasks(UUID taskListId) {
-        List<Task> tasks = taskRepository.findByTaskListId(taskListId);
+        var tasks = taskRepository.findByTaskListId(taskListId);
         return tasks.stream().map(taskMapper::toDto).toList();
     }
 

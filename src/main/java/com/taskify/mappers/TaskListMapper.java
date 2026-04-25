@@ -6,6 +6,7 @@ import com.taskify.dtos.UpdateTaskListRequest;
 import com.taskify.entities.TaskList;
 import com.taskify.entities.TaskStatus;
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,30 +18,30 @@ public class TaskListMapper {
         this.taskMapper = taskMapper;
     }
 
-    public TaskList fromCreateRequest(CreateTaskListRequest request) {
+    public @Nullable TaskList fromCreateRequest(@Nullable CreateTaskListRequest request) {
         if (request == null) {
             return null;
         }
 
-        TaskList taskList = new TaskList();
+        var taskList = new TaskList();
         taskList.setTitle(request.title());
         taskList.setDescription(request.description());
 
         return taskList;
     }
 
-    public TaskList fromUpdateRequest(UpdateTaskListRequest request) {
+    public @Nullable TaskList fromUpdateRequest(@Nullable UpdateTaskListRequest request) {
         if (request == null) {
             return null;
         }
 
-        TaskList taskList = new TaskList();
+        var taskList = new TaskList();
         taskList.setTitle(request.title());
         taskList.setDescription(request.description());
         return taskList;
     }
 
-    public TaskListDto toDto(TaskList taskList) {
+    public @Nullable TaskListDto toDto(@Nullable TaskList taskList) {
         if (taskList == null) {
             return null;
         }
@@ -49,9 +50,9 @@ public class TaskListMapper {
             return new TaskListDto(taskList.getId(), taskList.getTitle(), taskList.getDescription(), 0, 0.0, List.of());
         }
 
-        int count = taskList.getTasks().size();
+        var count = taskList.getTasks().size();
 
-        double progress = taskList.getTasks().stream()
+        var progress = taskList.getTasks().stream()
                         .filter(task -> task.getStatus() == TaskStatus.CLOSED)
                         .count()
                 * 100.0

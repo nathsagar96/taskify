@@ -4,17 +4,18 @@ import com.taskify.dtos.CreateTaskRequest;
 import com.taskify.dtos.TaskDto;
 import com.taskify.dtos.UpdateTaskRequest;
 import com.taskify.entities.Task;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TaskMapper {
 
-    public Task fromCreateRequest(CreateTaskRequest request) {
+    public @Nullable Task fromCreateRequest(@Nullable CreateTaskRequest request) {
         if (request == null) {
             return null;
         }
 
-        Task task = new Task();
+        var task = new Task();
         task.setTitle(request.title());
         task.setDescription(request.description());
         task.setDueDate(request.dueDate());
@@ -23,12 +24,12 @@ public class TaskMapper {
         return task;
     }
 
-    public Task fromUpdateRequest(UpdateTaskRequest request) {
+    public @Nullable Task fromUpdateRequest(@Nullable UpdateTaskRequest request) {
         if (request == null) {
             return null;
         }
 
-        Task task = new Task();
+        var task = new Task();
         task.setTitle(request.title());
         task.setDescription(request.description());
         task.setDueDate(request.dueDate());
@@ -38,7 +39,7 @@ public class TaskMapper {
         return task;
     }
 
-    public TaskDto toDto(Task task) {
+    public @Nullable TaskDto toDto(@Nullable Task task) {
         if (task == null) {
             return null;
         }

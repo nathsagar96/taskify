@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.taskify.BaseDataJpaTest;
 import com.taskify.entities.TaskList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -56,7 +55,7 @@ class TaskListRepositoryTest extends BaseDataJpaTest {
         @Test
         @DisplayName("Should find a task list by ID")
         void shouldFindTaskListById() {
-            Optional<TaskList> foundTaskList = taskListRepository.findById(taskList1.getId());
+            var foundTaskList = taskListRepository.findById(taskList1.getId());
             assertTrue(foundTaskList.isPresent());
             assertEquals(taskList1.getTitle(), foundTaskList.get().getTitle());
         }
@@ -64,7 +63,7 @@ class TaskListRepositoryTest extends BaseDataJpaTest {
         @Test
         @DisplayName("Should return empty optional if task list not found by ID")
         void shouldReturnEmptyOptionalIfTaskListNotFoundById() {
-            Optional<TaskList> foundTaskList = taskListRepository.findById(UUID.randomUUID());
+            var foundTaskList = taskListRepository.findById(UUID.randomUUID());
             assertTrue(foundTaskList.isEmpty());
         }
     }
@@ -76,7 +75,7 @@ class TaskListRepositoryTest extends BaseDataJpaTest {
         @DisplayName("Should delete a task list by ID")
         void shouldDeleteTaskListById() {
             taskListRepository.deleteById(taskList1.getId());
-            Optional<TaskList> deletedTaskList = taskListRepository.findById(taskList1.getId());
+            var deletedTaskList = taskListRepository.findById(taskList1.getId());
             assertTrue(deletedTaskList.isEmpty());
 
             List<TaskList> remainingTaskLists = taskListRepository.findAll();
@@ -88,7 +87,7 @@ class TaskListRepositoryTest extends BaseDataJpaTest {
         @DisplayName("Should not delete other task lists when deleting by ID")
         void shouldNotDeleteOtherTaskListsWhenDeletingById() {
             taskListRepository.deleteById(taskList1.getId());
-            Optional<TaskList> taskList2AfterDelete = taskListRepository.findById(taskList2.getId());
+            var taskList2AfterDelete = taskListRepository.findById(taskList2.getId());
             assertTrue(taskList2AfterDelete.isPresent());
         }
     }

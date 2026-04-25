@@ -97,9 +97,9 @@ class TaskListControllerTest {
         @Test
         @DisplayName("Should create a new task list successfully")
         void shouldCreateNewTaskListSuccessfully() throws Exception {
-            CreateTaskListRequest request = new CreateTaskListRequest("New Task List", "New Task List Description");
+            var request = new CreateTaskListRequest("New Task List", "New Task List Description");
 
-            TaskListDto createdTaskListDto = new TaskListDto(
+            var createdTaskListDto = new TaskListDto(
                     UUID.randomUUID(), request.title(), request.description(), 0, 0.0, java.util.List.of());
 
             when(taskListService.createTaskList(any(CreateTaskListRequest.class)))
@@ -120,7 +120,7 @@ class TaskListControllerTest {
         @Test
         @DisplayName("Should get a task list by ID")
         void shouldGetTaskListById() throws Exception {
-            TaskListDto taskListDto = new TaskListDto(
+            var taskListDto = new TaskListDto(
                     taskList1.getId(), taskList1.getTitle(), taskList1.getDescription(), 0, 0.0, java.util.List.of());
 
             when(taskListService.getTaskList(taskList1.getId())).thenReturn(taskListDto);
@@ -150,10 +150,9 @@ class TaskListControllerTest {
         @Test
         @DisplayName("Should update an existing task list successfully")
         void shouldUpdateExistingTaskListSuccessfully() throws Exception {
-            UpdateTaskListRequest request =
-                    new UpdateTaskListRequest("Updated Task List Name", "Updated Task List Description");
+            var request = new UpdateTaskListRequest("Updated Task List Name", "Updated Task List Description");
 
-            TaskListDto updatedTaskListDto = new TaskListDto(
+            var updatedTaskListDto = new TaskListDto(
                     taskList1.getId(), request.title(), request.description(), 0, 0.0, java.util.List.of());
 
             when(taskListService.updateTaskList(any(UUID.class), any(UpdateTaskListRequest.class)))
@@ -171,8 +170,7 @@ class TaskListControllerTest {
         @DisplayName("Should return 404 if task list not found when updating")
         void shouldReturn404IfTaskListNotFoundWhenUpdating() throws Exception {
             String taskListId = UUID.randomUUID().toString();
-            UpdateTaskListRequest request =
-                    new UpdateTaskListRequest("Updated Task List Name", "Updated Task List Description");
+            var request = new UpdateTaskListRequest("Updated Task List Name", "Updated Task List Description");
 
             when(taskListService.updateTaskList(any(UUID.class), any(UpdateTaskListRequest.class)))
                     .thenThrow(new TaskListNotFoundException("Task List not found with ID: " + taskListId));

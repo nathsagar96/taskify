@@ -11,7 +11,6 @@ import com.taskify.exceptions.TaskListNotFoundException;
 import com.taskify.mappers.TaskListMapper;
 import com.taskify.repositories.TaskListRepository;
 import com.taskify.repositories.TaskRepository;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -60,7 +59,7 @@ class TaskListServiceTest {
         @Test
         @DisplayName("Should create a task list successfully")
         void shouldCreateTaskListSuccessfully() {
-            CreateTaskListRequest request = new CreateTaskListRequest("Test Task List", "Description");
+            var request = new CreateTaskListRequest("Test Task List", "Description");
 
             when(taskListMapper.fromCreateRequest(any(CreateTaskListRequest.class)))
                     .thenReturn(taskList);
@@ -96,7 +95,7 @@ class TaskListServiceTest {
         @Test
         @DisplayName("Should return empty list when no task lists found")
         void shouldReturnEmptyListWhenNoTaskListsFound() {
-            when(taskListRepository.findAll()).thenReturn(Collections.emptyList());
+            when(taskListRepository.findAll()).thenReturn(List.of());
 
             List<TaskListDto> taskLists = taskListService.listTaskLists();
 
@@ -138,8 +137,8 @@ class TaskListServiceTest {
         @Test
         @DisplayName("Should update a task list successfully")
         void shouldUpdateTaskListSuccessfully() {
-            UpdateTaskListRequest request = new UpdateTaskListRequest("Updated Task List Name", "Updated Description");
-            TaskListDto updatedTaskListDto =
+            var request = new UpdateTaskListRequest("Updated Task List Name", "Updated Description");
+            var updatedTaskListDto =
                     new TaskListDto(taskListId, request.title(), request.description(), 0, 0.0, List.of());
 
             when(taskListRepository.findById(taskListId)).thenReturn(Optional.of(taskList));
@@ -159,7 +158,7 @@ class TaskListServiceTest {
         @Test
         @DisplayName("Should throw TaskListNotFoundException when updating non-existent task list")
         void shouldThrowTaskListNotFoundExceptionWhenUpdatingNonExistentTaskList() {
-            UpdateTaskListRequest request = new UpdateTaskListRequest("Updated Task List Name", "Updated Description");
+            var request = new UpdateTaskListRequest("Updated Task List Name", "Updated Description");
             when(taskListRepository.findById(taskListId)).thenReturn(Optional.empty());
 
             assertThrows(TaskListNotFoundException.class, () -> taskListService.updateTaskList(taskListId, request));

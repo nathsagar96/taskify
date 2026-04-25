@@ -28,7 +28,7 @@ class TaskListMapperTest {
         @DisplayName("Should map TaskList entity to TaskListDto")
         void shouldMapTaskListEntityToTaskListDto() {
             UUID taskListId = UUID.randomUUID();
-            TaskList taskList = new TaskList();
+            var taskList = new TaskList();
             taskList.setId(taskListId);
             taskList.setTitle("Test Task List");
 
@@ -48,7 +48,7 @@ class TaskListMapperTest {
         @Test
         @DisplayName("Should map CreateTaskListRequest to TaskList entity")
         void shouldMapCreateTaskListRequestToTaskListEntity() {
-            CreateTaskListRequest request = new CreateTaskListRequest("New Task List", "New Task List Description");
+            var request = new CreateTaskListRequest("New Task List", "New Task List Description");
 
             TaskList taskList = taskListMapper.fromCreateRequest(request);
 
@@ -64,8 +64,7 @@ class TaskListMapperTest {
         @Test
         @DisplayName("Should map UpdateTaskListRequest to TaskList entity")
         void shouldMapUpdateTaskListRequestToTaskListEntity() {
-            UpdateTaskListRequest request =
-                    new UpdateTaskListRequest("Updated Task List", "Updated Task List Description");
+            var request = new UpdateTaskListRequest("Updated Task List", "Updated Task List Description");
 
             TaskList taskList = taskListMapper.fromUpdateRequest(request);
 
